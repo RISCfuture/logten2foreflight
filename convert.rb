@@ -279,7 +279,7 @@ def print_aircraft(aircraft)
         plane[:gear_type],
         plane[:engine_type],
         plane[:complex] ? 'x' : nil,
-        plane[:high_perfomance] ? 'x' : nil,
+        plane[:high_performance] ? 'x' : nil,
         plane[:pressurized] ? 'x' : nil,
         *([nil]*44)
       ]

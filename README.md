@@ -13,7 +13,7 @@ throwaway code I've ever written. Comments are sparse; obscurity abounds.
 
 ## Installation
 
-This script requires Ruby 2.3 and the Bundler gem (`gem install bundler`).
+This script requires Ruby 2.4 and the Bundler gem (`gem install bundler`).
 Simply run `bundle install` in the project directory to install all other
 dependencies.
 
