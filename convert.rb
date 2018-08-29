@@ -115,7 +115,8 @@ def aircraft_type(type)
   return 'P28A' if type.start_with?('PA-28-')
   return 'P28R' if type.start_with?('PA-28R')
   return 'PA34' if type.start_with?('PA-34')
-  return 'S22T' if type.start_with?('SR22T')
+  return 'SR22' if type.start_with?('SR22-T')
+  return 'C82T' if type.start_with?('C-T182')
   return type
 end
 
