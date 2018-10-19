@@ -163,9 +163,10 @@ def load_ltp_logbook_flights(ltp_logbook)
 
     approaches = Array.new
     approach_data.each do |data|
+      type = approach_type(data[10]) or next
       num                 = (1..10).detect { |i| data[i - 1] }
       approaches[num - 1] = {
-          type:    approach_type(data[10]),
+          type:    type,
           runway:  data[11],
           airport: approach_airports.detect { |a| a[0] == data[12] }&.slice(1..2)&.compact&.first
       }
@@ -249,8 +250,12 @@ end
 
 def approach_type(type)
   return 'RNAV (GPS)' if %w[GPS GPS/GNSS].include?(type)
+  return 'ILS' if type == 'ILS/DME'
   return 'LOC' if type == 'LOC/DME'
   return 'RNAV (GPS)' if type == 'RNAV'
+  return 'RNAV (GPS)' if %w[LNAV LNAV/VNAV LNAV+V LP LP+V LPV].include?(type)
+  return 'VOR' if type == 'VOR/DME'
+  return nil if type == 'VISUAL'
 
   return type
 end
