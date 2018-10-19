@@ -181,7 +181,7 @@ def load_ltp_logbook_flights(ltp_logbook)
       picp = people_data[crew_data[0]]
       people << {name: picp[1], role: 'PIC', email: picp[2]}
     end
-    if crew_data[1] && crew_data[1] != my_id
+    if crew_data[1] && crew_data[1] != my_id && !remarks.downcase.include?('safety pilot')
       sicp = people_data[crew_data[1]]
       people << {name: sicp[1], role: 'SIC', email: sicp[2]}
     end
