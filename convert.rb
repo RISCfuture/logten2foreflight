@@ -9,13 +9,13 @@ $/ = "\r\n"
 LTP_LOGBOOK_PATH = Pathname.new('/Users/tim/Library/Containers/com.coradine.LogTenProX/Data/Documents/LogTenProData/LogTenCoreDataStore.sql')
 
 def find_ltp_logbook
-  if ARGV.size == 0
+  if ARGV.empty?
     if LTP_LOGBOOK_PATH.exist?
       return LTP_LOGBOOK_PATH
     else
-      $stderr.puts <<-EOF.chomp
-No LogTen Pro X logbook file detected. Re-run this command and specify the
-location of your LogTenCoreDataStore.sql file as an argument.
+      warn <<~EOF.chomp
+        No LogTen Pro X logbook file detected. Re-run this command and specify the
+        location of your LogTenCoreDataStore.sql file as an argument.
       EOF
       exit(1)
     end
@@ -24,7 +24,7 @@ location of your LogTenCoreDataStore.sql file as an argument.
     if path.exist?
       return path
     else
-      $stderr.puts "File not found: #{path.to_s}"
+      warn "File not found: #{path}"
       exit(2)
     end
   end
@@ -35,16 +35,16 @@ end
 AIRCRAFT_CATEGORIES = {
     502 => 'Airplane',
     275 => 'Simulator'
-}
+}.freeze
 AIRCRAFT_CLASSES    = {
     186 => 'ASEL',
     298 => 'ASES',
     0   => 'FTD',
     130 => 'AMEL'
-}
+}.freeze
 ENGINE_TYPES        = {
     531 => 'Piston'
-}
+}.freeze
 
 def load_ltp_logbook_aircraft(ltp_logbook)
   db       = SQLite3::Database.new(ltp_logbook.to_s)
@@ -93,6 +93,7 @@ def gear_type(category, amphib, floats, retract, skids, tailwheel)
   return 'FT' if !retract && !tailwheel
   return 'RC' if retract && tailwheel
   return 'RT' if retract && !tailwheel
+
   raise "Unknown gear type"
 end
 
@@ -100,6 +101,7 @@ def engine_type(code, radial, atype)
   type = ENGINE_TYPES[code]
   return 'Radial' if type == 'Piston' && radial
   return 'Diesel' if atype == 'DA42'
+
   return type
 end
 
@@ -117,6 +119,7 @@ def aircraft_type(type)
   return 'PA34' if type.start_with?('PA-34')
   return 'SR22' if type.start_with?('SR22-T')
   return 'C82T' if type.start_with?('C-T182')
+
   return type
 end
 
@@ -140,6 +143,7 @@ def load_ltp_logbook_flights(ltp_logbook)
       FROM ZFLIGHT") do |(flight_id, date, aircraft_id, from_id, to_id, route, time_out, time_in, on, off, total_time, pic, sic, night, solo, xc, distance, day_to, day_ldg, night_to, night_ldg, full_stops, night_full_stops, actual, sim_inst, hobbs_out, hobbs_in, tach_out, tach_in, holds, dual_given, dual_received, sim, ground, remarks, bfr, ipc)|
 
     next unless aircraft_id
+
     aircraft_data = db.execute("SELECT ZAIRCRAFT_AIRCRAFTID FROM ZAIRCRAFT WHERE Z_PK = #{aircraft_id}")[0]
 
     from_data     = db.execute("SELECT ZPLACE_ICAOID, ZPLACE_IDENTIFIER FROM ZPLACE WHERE Z_PK = #{from_id}")[0] if from_id
@@ -154,7 +158,7 @@ def load_ltp_logbook_flights(ltp_logbook)
 
     crew_data      = db.execute("SELECT ZFLIGHTCREW_PIC, ZFLIGHTCREW_SIC, ZFLIGHTCREW_INSTRUCTOR, ZFLIGHTCREW_STUDENT FROM ZFLIGHTCREW WHERE ZFLIGHTCREW_FLIGHT = #{flight_id}")[0]
     passenger_data = db.execute("SELECT #{(1..20).map { |i| 'ZFLIGHTPASSENGERS_PAX' + i.to_s }.join(', ')} FROM ZFLIGHTPASSENGERS WHERE ZFLIGHTPASSENGERS_FLIGHT = #{flight_id}")[0].compact
-    people_data    = db.execute("SELECT Z_PK, ZPERSON_NAME, ZPERSON_EMAIL, ZPERSON_ISME FROM ZPERSON").inject({}) { |hsh, p| hsh[p[0]] = p; hsh }
+    people_data    = db.execute("SELECT Z_PK, ZPERSON_NAME, ZPERSON_EMAIL, ZPERSON_ISME FROM ZPERSON").each_with_object({}) { |p, hsh| hsh[p[0]] = p; }
     my_id          = people_data.values.detect { |i| i[3] == 1 }[0]
 
     approaches = Array.new
@@ -167,11 +171,7 @@ def load_ltp_logbook_flights(ltp_logbook)
       }
     end
 
-    instructor = if crew_data[2]
-                   people_data[crew_data[2]][1]
-                 else
-                   instructor = nil
-                 end
+    instructor = crew_data[2] ? people_data[crew_data[2]][1] : nil
 
     people = Array.new
     if remarks.downcase.include?('safety pilot') && crew_data[0] == my_id && crew_data[1]
@@ -248,9 +248,10 @@ def load_ltp_logbook_flights(ltp_logbook)
 end
 
 def approach_type(type)
-  return 'RNAV (GPS)' if type == 'GPS' || type == 'GPS/GNSS'
+  return 'RNAV (GPS)' if %w[GPS GPS/GNSS].include?(type)
   return 'LOC' if type == 'LOC/DME'
   return 'RNAV (GPS)' if type == 'RNAV'
+
   return type
 end
 
@@ -265,8 +266,8 @@ def print_aircraft(aircraft)
   puts "Aircraft Table,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
 
   puts(CSV.generate do |csv|
-    csv << (%w(Text Text YYYY Text Text Text Text Text Text Boolean Boolean Boolean) + [nil] * 44)
-    csv << (%w(AircraftID TypeCode Year Make Model Category Class GearType EngineType Complex HighPerformance Pressurized) + [nil] * 44)
+    csv << (%w[Text Text YYYY Text Text Text Text Text Text Boolean Boolean Boolean] + [nil] * 44)
+    csv << (%w[AircraftID TypeCode Year Make Model Category Class GearType EngineType Complex HighPerformance Pressurized] + [nil] * 44)
 
     aircraft.sort_by { |a| a[:tail_number] }.each do |plane|
       csv << [
@@ -293,7 +294,7 @@ def print_flights(flights)
   puts "Flights Table,,,,,,,,,,,,,,,,,,,,,,,,,,,,#;type;runway;airport;comments,,,,,,,,,,,,name;role;email,,,,,,,,,,,,,,,"
 
   puts(CSV.generate do |csv|
-    csv << %w(Date Text Text Text Text hhmm hhmm hhmm hhmm Decimal Decimal Decimal Decimal Decimal Decimal Decimal Number Number Number Number Number Decimal Decimal Decimal Decimal Decimal Decimal Number PackedDetail PackedDetail PackedDetail PackedDetail PackedDetail PackedDetail Decimal Decimal Decimal Decimal Text Text PackedDetail PackedDetail PackedDetail PackedDetail PackedDetail PackedDetail Boolean Boolean Boolean Text Decimal Decimal Number Date Boolean Text)
+    csv << %w[Date Text Text Text Text hhmm hhmm hhmm hhmm Decimal Decimal Decimal Decimal Decimal Decimal Decimal Number Number Number Number Number Decimal Decimal Decimal Decimal Decimal Decimal Number PackedDetail PackedDetail PackedDetail PackedDetail PackedDetail PackedDetail Decimal Decimal Decimal Decimal Text Text PackedDetail PackedDetail PackedDetail PackedDetail PackedDetail PackedDetail Boolean Boolean Boolean Text Decimal Decimal Number Date Boolean Text]
     csv << %w(Date AircraftID From To Route TimeOut TimeIn OnDuty OffDuty TotalTime PIC SIC Night Solo CrossCountry Distance DayTakeoffs DayLandingsFullStop NightTakeoffs NightLandingsFullStop AllLandings ActualInstrument SimulatedInstrument HobbsStart HobbsEnd TachStart TachEnd Holds Approach1 Approach2 Approach3 Approach4 Approach5 Approach6 DualGiven DualReceived SimulatedFlight GroundTraining InstructorName InstructorComments Person1 Person2 Person3 Person4 Person5 Person6 FlightReview Checkride IPC [Text]CustomFieldName [Numeric]CustomFieldName [Hours]CustomFieldName [Counter]CustomFieldName [Date]CustomFieldName [Toggle]CustomFieldName PilotComments)
 
     flights.sort_by { |f| f[:date] }.each do |flight|
