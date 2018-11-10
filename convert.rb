@@ -6,7 +6,7 @@ $/ = "\r\n"
 
 ################################################################################
 
-LTP_LOGBOOK_PATH = Pathname.new('/Users/tim/Library/Containers/com.coradine.LogTenProX/Data/Documents/LogTenProData/LogTenCoreDataStore.sql')
+LTP_LOGBOOK_PATH = Pathname.new(ENV['HOME']).join('Library/Containers/com.coradine.LogTenProX/Data/Documents/LogTenProData/LogTenCoreDataStore.sql')
 
 def find_ltp_logbook
   if ARGV.empty?
