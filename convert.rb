@@ -33,17 +33,17 @@ end
 ################################################################################
 
 AIRCRAFT_CATEGORIES = {
-    682 => 'Airplane',
-    773 => 'Simulator'
+    210 => 'Airplane',
+    100 => 'Simulator'
 }.freeze
 AIRCRAFT_CLASSES    = {
-    447 => 'ASEL',
-    590 => 'ASES',
+    321 => 'ASEL',
+    146 => 'ASES',
     0   => 'FTD',
-    711 => 'AMEL'
+    680 => 'AMEL'
 }.freeze
 ENGINE_TYPES        = {
-    134 => 'Piston'
+    244 => 'Piston'
 }.freeze
 
 def load_ltp_logbook_aircraft(ltp_logbook)
