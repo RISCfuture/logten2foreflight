@@ -64,10 +64,8 @@ This script has been tailored to my specific logbook. It will likely require at 
   types. For example, I have "C-172SP" as a type instead of "C172". There is a
   method that converts these types from my own format to FAA standard type
   identifiers. You may need to modify this method or not call it.
-* LogTen Pro X does not store the simulator type (ATD, FTD, FFS). I did my 
-  simulator training in a FRASCA 142 flight training device (FTD), so a `nil`
-  class is assumed to be an FTD. If you used a different level of simulator, or
-  you have other aircraft with no class, then you will need to modify this code.
+* The aircraft type Custom Field #1 is assumed to store the simulator type, for
+  flight simulators. This field should contain "FTD", "ATD", or "FFS".
 * LogTen Pro X does not record whether an aircraft has diesel engines. The only
   diesel I fly is a DA42, so I just set the engine type to Diesel for that type
   only.
