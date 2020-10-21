@@ -59,7 +59,10 @@ This script has been tailored to my specific logbook. It will likely require at 
   identifiers, you will have to do some spelunking.
 * LogTen Pro X stores engine types as numeric identifiers. I only fly piston
   aircraft, so if you need numeric identifiers for other engine types
-  (turboprop, jet), you will have to figure them out yourself.
+  (turboprop, turboshaft), you will have to figure them out yourself.
+* LogTen Pro X only has a "jet" engine type, and does not distinguish between
+  turbofan and turbojet engines, unlike ForeFlight. Aircraft with jet engines
+  are assumed to be turbofans.
 * The "aircraft type" field in my logbook does not conform to FAA aircraft
   types. For example, I have "C-172SP" as a type instead of "C172". There is a
   method that converts these types from my own format to FAA standard type
