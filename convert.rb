@@ -37,14 +37,14 @@ AIRCRAFT_CATEGORIES = {
     100 => 'Simulator',
     581 => 'Glider'
 }.freeze
-AIRCRAFT_CLASSES    = {
+AIRCRAFT_CLASSES = {
     321 => 'ASEL',
     146 => 'ASES',
     0   => 'FTD',
     680 => 'AMEL',
     97  => 'AMES'
 }.freeze
-ENGINE_TYPES        = {
+ENGINE_TYPES = {
     244 => 'Piston',
     415 => 'Turbofan'
 }.freeze
@@ -158,15 +158,15 @@ def load_ltp_logbook_flights(ltp_logbook)
     from_data     = db.execute("SELECT ZPLACE_ICAOID, ZPLACE_IDENTIFIER FROM ZPLACE WHERE Z_PK = #{from_id}")[0] if from_id
     to_data       = db.execute("SELECT ZPLACE_ICAOID, ZPLACE_IDENTIFIER FROM ZPLACE WHERE Z_PK = #{to_id}")[0] if to_id
 
-    approach_ids      = db.execute("SELECT #{(1..10).map { |i| 'ZFLIGHTAPPROACHES_APPROACH' + i.to_s }.join(', ')}
+    approach_ids      = db.execute("SELECT #{(1..10).map { |i| "ZFLIGHTAPPROACHES_APPROACH#{i}" }.join(', ')}
         FROM ZFLIGHTAPPROACHES WHERE ZFLIGHTAPPROACHES_FLIGHT = #{flight_id}").flatten.compact
-    approach_data     = db.execute("SELECT #{(1..10).map { |i| 'ZAPPROACH_FLIGHTAPPROACHES' + i.to_s }.join(', ')},
+    approach_data     = db.execute("SELECT #{(1..10).map { |i| "ZAPPROACH_FLIGHTAPPROACHES#{i}" }.join(', ')},
         ZAPPROACH_TYPE, ZAPPROACH_COMMENT, ZAPPROACH_PLACE FROM ZAPPROACH
         WHERE Z_PK IN (#{approach_ids.join(', ')})")
     approach_airports = db.execute("SELECT Z_PK, ZPLACE_ICAOID, ZPLACE_IDENTIFIER FROM ZPLACE WHERE Z_PK IN (#{approach_data.map { |a| a[12] }.compact.join(', ')})")
 
     crew_data      = db.execute("SELECT ZFLIGHTCREW_PIC, ZFLIGHTCREW_SIC, ZFLIGHTCREW_INSTRUCTOR, ZFLIGHTCREW_STUDENT FROM ZFLIGHTCREW WHERE ZFLIGHTCREW_FLIGHT = #{flight_id}")[0]
-    passenger_data = db.execute("SELECT #{(1..20).map { |i| 'ZFLIGHTPASSENGERS_PAX' + i.to_s }.join(', ')} FROM ZFLIGHTPASSENGERS WHERE ZFLIGHTPASSENGERS_FLIGHT = #{flight_id}")[0].compact
+    passenger_data = db.execute("SELECT #{(1..20).map { |i| "ZFLIGHTPASSENGERS_PAX#{i}" }.join(', ')} FROM ZFLIGHTPASSENGERS WHERE ZFLIGHTPASSENGERS_FLIGHT = #{flight_id}")[0].compact
     people_data    = db.execute("SELECT Z_PK, ZPERSON_NAME, ZPERSON_EMAIL, ZPERSON_ISME FROM ZPERSON").each_with_object({}) { |p, hsh| hsh[p[0]] = p; }
     my_id          = people_data.values.detect { |i| i[3] == 1 }[0]
 
