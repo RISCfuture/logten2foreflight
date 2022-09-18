@@ -87,9 +87,6 @@ def load_ltp_logbook_aircraft(ltp_logbook)
   return aircraft
 end
 
-def build_ff_logbook
-end
-
 def gear_type(category, amphib, floats, retract, skids, tailwheel)
   return nil if AIRCRAFT_CATEGORIES[category] == 'Simulator'
   return 'AM' if amphib
