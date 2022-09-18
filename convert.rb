@@ -34,7 +34,8 @@ end
 
 AIRCRAFT_CATEGORIES = {
     210 => 'Airplane',
-    100 => 'Simulator'
+    100 => 'Simulator',
+    581 => 'Glider'
 }.freeze
 AIRCRAFT_CLASSES    = {
     321 => 'ASEL',
@@ -62,16 +63,18 @@ def load_ltp_logbook_aircraft(ltp_logbook)
         FROM ZAIRCRAFTTYPE WHERE Z_PK = #{type_id}")[0]
     year      = (Time.utc(2001, 1, 1) + year.to_i).year
 
+    category = type_data[3] ? AIRCRAFT_CATEGORIES[type_data[3].to_i] : nil
+    klass    = type_data[4] ? AIRCRAFT_CLASSES[type_data[4].to_i] : nil
     aircraft << {
         tail_number:      tail_number,
         type_code:        aircraft_type(type_data[0]),
         year:             year,
         make:             type_data[1],
         model:            type_data[2],
-        category:         AIRCRAFT_CATEGORIES[type_data[3].to_i],
-        class:            AIRCRAFT_CLASSES[type_data[4].to_i],
+        category:         category,
+        class:            klass,
         gear_type:        gear_type(type_data[3].to_i, amphib == 1, floats == 1, retract == 1, skids == 1, tailwheel == 1),
-        engine_type:      engine_type(type_data[5], radial == 1, type_data[0]),
+        engine_type:      engine_type(type_data[5], radial == 1, type_data[0], category),
         complex:          complex == 1,
         high_performance: hp == 1,
         pressurized:      pressurized == 1
@@ -97,10 +100,11 @@ def gear_type(category, amphib, floats, retract, skids, tailwheel)
   raise "Unknown gear type"
 end
 
-def engine_type(code, radial, atype)
+def engine_type(code, radial, atype, category)
   type = ENGINE_TYPES[code]
   return 'Radial' if type == 'Piston' && radial
   return 'Diesel' if atype == 'DA42'
+  return 'Non-Powered' if category == 'Glider'
 
   return type
 end
