@@ -8,7 +8,7 @@ $/ = "\r\n"
 
 ################################################################################
 
-LTP_LOGBOOK_PATH = Pathname.new(ENV['HOME']).join('Library/Containers/com.coradine.LogTenProX/Data/Documents/LogTenProData/LogTenCoreDataStore.sql')
+LTP_LOGBOOK_PATH = Pathname.new(Dir.home).join('Library/Containers/com.coradine.LogTenProX/Data/Documents/LogTenProData/LogTenCoreDataStore.sql')
 
 def find_ltp_logbook
   if ARGV.empty?
@@ -275,7 +275,7 @@ def load_ltp_logbook_flights(ltp_logbook)
         tach_start:           tach_out ? tach_out / 60.0 : nil,
         tach_end:             tach_in ? tach_in / 60.0 : nil,
         holds:                holds || 0,
-        approaches:           approaches,
+        approaches:,
         dual_given:           (dual_given || 0) / 60.0,
         dual_received:        (dual_received || 0) / 60.0,
         simulated:            (sim || 0) / 60.0,
