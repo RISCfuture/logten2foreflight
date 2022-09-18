@@ -37,14 +37,14 @@ AIRCRAFT_CATEGORIES = {
     100 => 'Simulator',
     581 => 'Glider'
 }.freeze
-AIRCRAFT_CLASSES = {
+AIRCRAFT_CLASSES    = {
     321 => 'ASEL',
     146 => 'ASES',
     0   => 'FTD',
     680 => 'AMEL',
     97  => 'AMES'
 }.freeze
-ENGINE_TYPES = {
+ENGINE_TYPES        = {
     244 => 'Piston'
 }.freeze
 
@@ -60,7 +60,7 @@ def load_ltp_logbook_aircraft(ltp_logbook)
       FROM ZAIRCRAFT") do |(tail_number, type_id, year, amphib, floats, retract, skids, tailwheel, radial, complex, hp, pressurized)|
     type_data = db.execute("SELECT ZAIRCRAFTTYPE_TYPE, ZAIRCRAFTTYPE_MAKE,
         ZAIRCRAFTTYPE_MODEL, ZAIRCRAFTTYPE_CATEGORY, ZAIRCRAFTTYPE_AIRCRAFTCLASS,
-        ZAIRCRAFTTYPE_ENGINETYPE
+        ZAIRCRAFTTYPE_ENGINETYPE, ZAIRCRAFTTYPE_CUSTOMATTRIBUTE1
         FROM ZAIRCRAFTTYPE WHERE Z_PK = #{type_id}")[0]
     year      = (Time.utc(2001, 1, 1) + year.to_i).year
 
@@ -69,6 +69,7 @@ def load_ltp_logbook_aircraft(ltp_logbook)
     aircraft << {
         tail_number:      tail_number,
         type_code:        aircraft_type(type_data[0]),
+        equipment_code:   type_data[6]&.downcase,
         year:             year,
         make:             type_data[1],
         model:            type_data[2],
@@ -138,7 +139,7 @@ def load_ltp_logbook_flights(ltp_logbook)
 
   db.execute("SELECT Z_PK, ZFLIGHT_FLIGHTDATE, ZFLIGHT_AIRCRAFT, ZFLIGHT_FROMPLACE,
       ZFLIGHT_TOPLACE, ZFLIGHT_ROUTE, ZFLIGHT_ACTUALDEPARTURETIME,
-      ZFLIGHT_ACTUALARRIVALTIME, ZFLIGHT_ONDUTYTIME, ZFLIGHT_OFFDUTYTIME,
+      ZFLIGHT_TAKEOFFTIME, ZFLIGHT_LANDINGTIME, ZFLIGHT_ACTUALARRIVALTIME, ZFLIGHT_ONDUTYTIME, ZFLIGHT_OFFDUTYTIME,
       ZFLIGHT_TOTALTIME, ZFLIGHT_PIC, ZFLIGHT_SIC, ZFLIGHT_NIGHT, ZFLIGHT_SOLO,
       ZFLIGHT_CROSSCOUNTRY, ZFLIGHT_DISTANCE, ZFLIGHT_DAYTAKEOFFS,
       ZFLIGHT_DAYLANDINGS, ZFLIGHT_NIGHTTAKEOFFS, ZFLIGHT_NIGHTLANDINGS,
@@ -147,7 +148,7 @@ def load_ltp_logbook_flights(ltp_logbook)
       ZFLIGHT_TACHSTART, ZFLIGHT_TACHSTOP, ZFLIGHT_HOLDS, ZFLIGHT_DUALGIVEN,
       ZFLIGHT_DUALRECEIVED, ZFLIGHT_SIMULATOR, ZFLIGHT_GROUND, ZFLIGHT_REMARKS,
       ZFLIGHT_REVIEW, ZFLIGHT_INSTRUMENTPROFICIENCYCHECK
-      FROM ZFLIGHT") do |(flight_id, date, aircraft_id, from_id, to_id, route, time_out, time_in, on, off, total_time, pic, sic, night, solo, xc, distance, day_to, day_ldg, night_to, night_ldg, full_stops, night_full_stops, actual, sim_inst, hobbs_out, hobbs_in, tach_out, tach_in, holds, dual_given, dual_received, sim, ground, remarks, bfr, ipc)|
+      FROM ZFLIGHT") do |(flight_id, date, aircraft_id, from_id, to_id, route, time_out, off, on, time_in, on_duty, off_duty, total_time, pic, sic, night, solo, xc, distance, day_to, day_ldg, night_to, night_ldg, full_stops, night_full_stops, actual, sim_inst, hobbs_out, hobbs_in, tach_out, tach_in, holds, dual_given, dual_received, sim, ground, remarks, bfr, ipc)|
     next unless aircraft_id
 
     aircraft_data = db.execute("SELECT ZAIRCRAFT_AIRCRAFTID FROM ZAIRCRAFT WHERE Z_PK = #{aircraft_id}")[0]
@@ -213,9 +214,11 @@ def load_ltp_logbook_flights(ltp_logbook)
         to:                   to_data ? to_data[0] || to_data[1] : nil,
         route:                route&.gsub('-', ' '),
         out:                  time_out ? Time.utc(2001, 1, 1) + time_out : nil,
-        in:                   time_in ? Time.utc(2001, 1, 1) + time_in : nil,
-        on:                   on ? Time.utc(2001, 1, 1) + on : nil,
         off:                  off ? Time.utc(2001, 1, 1) + off : nil,
+        on:                   on ? Time.utc(2001, 1, 1) + on : nil,
+        in:                   time_in ? Time.utc(2001, 1, 1) + time_in : nil,
+        off_duty:             off_duty ? Time.utc(2001, 1, 1) + time_in : nil,
+        on_duty:              on_duty ? Time.utc(2001, 1, 1) + time_in : nil,
         total_time:           total_time / 60.0,
         pic:                  (pic || 0) / 60.0,
         sic:                  (sic || 0) / 60.0,
@@ -269,20 +272,21 @@ end
 ################################################################################
 
 def print_header
-  puts "ForeFlight Logbook Import,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
+  puts "ForeFlight Logbook Import,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
 end
 
 def print_aircraft(aircraft)
-  puts ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
-  puts "Aircraft Table,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
+  puts ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
+  puts "Aircraft Table,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
 
   puts(CSV.generate do |csv|
-    csv << (%w[Text Text YYYY Text Text Text Text Text Text Boolean Boolean Boolean] + [nil] * 44)
-    csv << (%w[AircraftID TypeCode Year Make Model Category Class GearType EngineType Complex HighPerformance Pressurized] + [nil] * 44)
+    csv << (%w[Text Text Text YYYY Text Text Text Text Text Text Boolean Boolean Boolean] + [nil] * 45)
+    csv << (%w[AircraftID EquipmentType TypeCode Year Make Model Category Class GearType EngineType Complex HighPerformance Pressurized] + [nil] * 45)
 
     aircraft.sort_by { |a| a[:tail_number] }.each do |plane|
       csv << [
           plane[:tail_number],
+          plane[:equipment_code],
           plane[:type_code],
           plane[:year].to_s,
           plane[:make],
@@ -294,19 +298,19 @@ def print_aircraft(aircraft)
           plane[:complex] ? 'x' : nil,
           plane[:high_performance] ? 'x' : nil,
           plane[:pressurized] ? 'x' : nil,
-          *([nil] * 44)
+          *([nil] * 45)
       ]
     end
   end)
 end
 
 def print_flights(flights)
-  puts ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
-  puts "Flights Table,,,,,,,,,,,,,,,,,,,,,,,,,,,,#;type;runway;airport;comments,,,,,,,,,,,,name;role;email,,,,,,,,,,,,,,,"
+  puts ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
+  puts "Flights Table,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#;type;runway;airport;comments,,,,,,,,,,,,name;role;email,,,,,,,,,,,,,,,"
 
   puts(CSV.generate do |csv|
-    csv << %w[Date Text Text Text Text hhmm hhmm hhmm hhmm Decimal Decimal Decimal Decimal Decimal Decimal Decimal Number Number Number Number Number Decimal Decimal Decimal Decimal Decimal Decimal Number PackedDetail PackedDetail PackedDetail PackedDetail PackedDetail PackedDetail Decimal Decimal Decimal Decimal Text Text PackedDetail PackedDetail PackedDetail PackedDetail PackedDetail PackedDetail Boolean Boolean Boolean Text Decimal Decimal Number Date Boolean Text]
-    csv << %w(Date AircraftID From To Route TimeOut TimeIn OnDuty OffDuty TotalTime PIC SIC Night Solo CrossCountry Distance DayTakeoffs DayLandingsFullStop NightTakeoffs NightLandingsFullStop AllLandings ActualInstrument SimulatedInstrument HobbsStart HobbsEnd TachStart TachEnd Holds Approach1 Approach2 Approach3 Approach4 Approach5 Approach6 DualGiven DualReceived SimulatedFlight GroundTraining InstructorName InstructorComments Person1 Person2 Person3 Person4 Person5 Person6 FlightReview Checkride IPC [Text]CustomFieldName [Numeric]CustomFieldName [Hours]CustomFieldName [Counter]CustomFieldName [Date]CustomFieldName [Toggle]CustomFieldName PilotComments)
+    csv << ["Date", "Text", "Text", "Text", "Text", "hhmm", "hhmm", "hhmm", "hhmm", "hhmm", "hhmm", "Decimal", "Decimal", "Decimal", "Decimal", "Decimal", "Decimal", "Decimal", "Number", "Number", "Number", "Number", "Number", "Decimal", "Decimal", "Decimal", "Decimal", "Decimal", "Decimal", "Number", "Packed Detail", "Packed Detail", "Packed Detail", "Packed Detail", "Packed Detail", "Packed Detail", "Decimal", "Decimal", "Decimal", "Decimal", "Text", "Text", "Packed Detail", "Packed Detail", "Packed Detail", "Packed Detail", "Packed Detail", "Packed Detail", "Boolean", "Boolean", "Boolean", "Text", "Decimal", "Decimal", "Number", "Date", "Boolean", "Text"]
+    csv << %w(Date AircraftID From To Route TimeOut TimeOff TimeOn TimeIn OnDuty OffDuty TotalTime PIC SIC Night Solo CrossCountry Distance DayTakeoffs DayLandingsFullStop NightTakeoffs NightLandingsFullStop AllLandings ActualInstrument SimulatedInstrument HobbsStart HobbsEnd TachStart TachEnd Holds Approach1 Approach2 Approach3 Approach4 Approach5 Approach6 DualGiven DualReceived SimulatedFlight GroundTraining InstructorName InstructorComments Person1 Person2 Person3 Person4 Person5 Person6 FlightReview Checkride IPC [Text]CustomFieldName [Numeric]CustomFieldName [Hours]CustomFieldName [Counter]CustomFieldName [Date]CustomFieldName [Toggle]CustomFieldName PilotComments)
 
     flights.sort_by { |f| f[:date] }.each do |flight|
       csv << [
@@ -316,9 +320,11 @@ def print_flights(flights)
           flight[:to],
           flight[:route],
           flight[:out] ? flight[:out].strftime('%H%M') : nil,
-          flight[:in] ? flight[:in].strftime('%H%M') : nil,
           flight[:off] ? flight[:off].strftime('%H%M') : nil,
           flight[:on] ? flight[:on].strftime('%H%M') : nil,
+          flight[:in] ? flight[:in].strftime('%H%M') : nil,
+          flight[:off_duty] ? flight[:off_duty].strftime('%H%M') : nil,
+          flight[:on_duty] ? flight[:on_duty].strftime('%H%M') : nil,
           flight[:total_time].round(1),
           flight[:pic].round(1),
           flight[:sic].round(1),
