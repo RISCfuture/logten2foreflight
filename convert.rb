@@ -33,20 +33,19 @@ end
 ################################################################################
 
 AIRCRAFT_CATEGORIES = {
-    210 => 'Airplane',
-    100 => 'Simulator',
-    581 => 'Glider'
+    210 => 'airplane',
+    581 => 'glider'
 }.freeze
 AIRCRAFT_CLASSES = {
-    321 => 'ASEL',
-    146 => 'ASES',
-    0   => 'FTD',
-    680 => 'AMEL',
-    97  => 'AMES'
+    321 => 'airplane_single_engine_land',
+    146 => 'airplane_single_engine_sea',
+    680 => 'airplane_multi_engine_land',
+    97  => 'airplane_multi_engine_sea'
 }.freeze
 ENGINE_TYPES = {
     244 => 'Piston',
-    415 => 'Turbofan'
+    415 => 'Turbofan',
+    507 => 'Non-Powered'
 }.freeze
 
 def load_ltp_logbook_aircraft(ltp_logbook)
@@ -56,42 +55,58 @@ def load_ltp_logbook_aircraft(ltp_logbook)
   db.execute("SELECT ZAIRCRAFT_AIRCRAFTID, ZAIRCRAFT_AIRCRAFTTYPE,
       ZAIRCRAFT_YEAR, ZAIRCRAFT_UNDERCARRIAGEAMPHIB,
       ZAIRCRAFT_UNDERCARRIAGEFLOATS, ZAIRCRAFT_UNDERCARRIAGERETRACTABLE,
-      ZAIRCRAFT_UNDERCARRIAGESKIDS, ZAIRCRAFT_TAILWHEEL, ZAIRCRAFT_RADIALENGINE,
-      ZAIRCRAFT_COMPLEX, ZAIRCRAFT_HIGHPERFORMANCE, ZAIRCRAFT_PRESSURIZED
-      FROM ZAIRCRAFT") do |(tail_number, type_id, year, amphib, floats, retract, skids, tailwheel, radial, complex, hp, pressurized)|
-    type_data = db.execute("SELECT ZAIRCRAFTTYPE_TYPE, ZAIRCRAFTTYPE_MAKE,
+      ZAIRCRAFT_UNDERCARRIAGESKIDS, ZAIRCRAFT_UNDERCARRIAGESKIS,
+      ZAIRCRAFT_TAILWHEEL, ZAIRCRAFT_RADIALENGINE, ZAIRCRAFT_COMPLEX,
+      ZAIRCRAFT_HIGHPERFORMANCE, ZAIRCRAFT_PRESSURIZED,
+      ZAIRCRAFT_TECHNICALLYADVANCED
+      FROM ZAIRCRAFT") do |(tail_number, type_id, year, amphib, floats, retract, skids, skis, tailwheel, radial, complex, hp, pressurized, taa)|
+    type_data                                                                                                          = db.execute("SELECT ZAIRCRAFTTYPE_TYPE, ZAIRCRAFTTYPE_MAKE,
         ZAIRCRAFTTYPE_MODEL, ZAIRCRAFTTYPE_CATEGORY, ZAIRCRAFTTYPE_AIRCRAFTCLASS,
-        ZAIRCRAFTTYPE_ENGINETYPE, ZAIRCRAFTTYPE_CUSTOMATTRIBUTE1
+        ZAIRCRAFTTYPE_ENGINETYPE, ZAIRCRAFTTYPE_CUSTOMATTRIBUTE1,
+        ZAIRCRAFTTYPE_CUSTOMATTRIBUTE2, ZAIRCRAFTTYPE_CUSTOMATTRIBUTE3
         FROM ZAIRCRAFTTYPE WHERE Z_PK = #{type_id}")[0]
-    year      = (Time.utc(2001, 1, 1) + year.to_i).year
+    type_code, make, model, category_id, class_id, engine_type_id, sim_type, sim_aircraft, sim_aircraft_cat = type_data
 
-    category = type_data[3] ? AIRCRAFT_CATEGORIES.fetch(type_data[3].to_i) : nil
-    klass    = type_data[4] ? AIRCRAFT_CLASSES.fetch(type_data[4].to_i) : nil
+    year = (Time.utc(2001, 1, 1) + year.to_i).year if year
+
+    if category_id == 100 # simulator
+      equipment_type  = sim_type.downcase
+      category, klass = simulator_category_class(sim_aircraft_cat)
+      type_code       = sim_aircraft
+    else
+      equipment_type = 'aircraft'
+      category       = category_id ? AIRCRAFT_CATEGORIES.fetch(category_id) : nil
+      klass          = aircraft_class(category, class_id)
+      type_code      = aircraft_type(type_code)
+    end
+
     aircraft << {
         tail_number:      tail_number,
-        type_code:        aircraft_type(type_data[0]),
-        equipment_code:   type_data[6]&.downcase,
+        type_code:        type_code,
         year:             year,
-        make:             type_data[1],
-        model:            type_data[2],
+        make:             make,
+        model:            model,
+        equipment_type:   equipment_type,
         category:         category,
         class:            klass,
-        gear_type:        gear_type(type_data[3].to_i, amphib == 1, floats == 1, retract == 1, skids == 1, tailwheel == 1),
-        engine_type:      engine_type(type_data[5], radial == 1, type_data[0], category),
+        gear_type:        gear_type(category_id == 100, amphib == 1, floats == 1, retract == 1, skids == 1, skis == 1, tailwheel == 1),
+        engine_type:      engine_type(engine_type_id, radial == 1, make),
         complex:          complex == 1,
         high_performance: hp == 1,
-        pressurized:      pressurized == 1
+        pressurized:      pressurized == 1,
+        taa:              taa == 1
     }
   end
 
   return aircraft
 end
 
-def gear_type(category, amphib, floats, retract, skids, tailwheel)
-  return nil if AIRCRAFT_CATEGORIES[category] == 'Simulator'
+def gear_type(simulator, amphib, floats, retract, skids, skis, tailwheel)
+  return nil if simulator
   return 'AM' if amphib
-  return 'Floats' if floats
+  return 'FL' if floats
   return 'Skids' if skids
+  return 'Skis' if skis
   return 'FC' if !retract && tailwheel
   return 'FT' if !retract && !tailwheel
   return 'RC' if retract && tailwheel
@@ -100,15 +115,20 @@ def gear_type(category, amphib, floats, retract, skids, tailwheel)
   raise "Unknown gear type"
 end
 
-def engine_type(code, radial, atype, category)
+def engine_type(code, radial, atype)
   return nil unless code
 
   type = ENGINE_TYPES.fetch(code)
   return 'Radial' if type == 'Piston' && radial
   return 'Diesel' if atype == 'DA42'
-  return 'Non-Powered' if category == 'Glider'
 
   return type
+end
+
+def aircraft_class(category, class_id)
+  return 'glider' if category == 'glider'
+
+  return class_id ? AIRCRAFT_CLASSES.fetch(class_id) : nil
 end
 
 def aircraft_type(type)
@@ -124,10 +144,24 @@ def aircraft_type(type)
   return 'P28R' if type.start_with?('PA-28R')
   return 'PA34' if type.start_with?('PA-34')
   return 'SR22' if type.start_with?('SR22-')
+  return 'SR22' if type.start_with?('SR22N-')
+  return 'S22T' if type.start_with?('SR22T-')
   return 'SF50' if type.start_with?('SF50-')
   return 'C82T' if type.start_with?('C-T182')
+  return 'G44' if type.start_with?('G-44')
+  return 'S233' if type.start_with?('2-33')
 
   return type
+end
+
+def simulator_category_class(cat)
+  return %w[airplane airplane_single_engine_land] if cat == 'ASEL'
+  return %w[airplane airplane_multi_engine_land] if cat == 'AMEL'
+  return %w[airplane airplane_single_engine_sea] if cat == 'ASEL'
+  return %w[airplane airplane_multi_engine_sea] if cat == 'AMES'
+  return %w[glider glider] if cat == 'GL'
+
+  return nil
 end
 
 ################################################################################
@@ -285,7 +319,7 @@ def print_aircraft(aircraft)
     aircraft.sort_by { |a| a[:tail_number] }.each do |plane|
       csv << [
           plane[:tail_number],
-          plane[:equipment_code],
+          plane[:equipment_type],
           plane[:type_code],
           plane[:year].to_s,
           plane[:make],
