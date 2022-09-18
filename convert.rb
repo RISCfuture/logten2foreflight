@@ -63,8 +63,8 @@ def load_ltp_logbook_aircraft(ltp_logbook)
         FROM ZAIRCRAFTTYPE WHERE Z_PK = #{type_id}")[0]
     year      = (Time.utc(2001, 1, 1) + year.to_i).year
 
-    category = type_data[3] ? AIRCRAFT_CATEGORIES[type_data[3].to_i] : nil
-    klass    = type_data[4] ? AIRCRAFT_CLASSES[type_data[4].to_i] : nil
+    category = type_data[3] ? AIRCRAFT_CATEGORIES.fetch(type_data[3].to_i) : nil
+    klass    = type_data[4] ? AIRCRAFT_CLASSES.fetch(type_data[4].to_i) : nil
     aircraft << {
         tail_number:      tail_number,
         type_code:        aircraft_type(type_data[0]),
@@ -101,7 +101,9 @@ def gear_type(category, amphib, floats, retract, skids, tailwheel)
 end
 
 def engine_type(code, radial, atype, category)
-  type = ENGINE_TYPES[code]
+  return nil unless code
+
+  type = ENGINE_TYPES.fetch(code)
   return 'Radial' if type == 'Piston' && radial
   return 'Diesel' if atype == 'DA42'
   return 'Non-Powered' if category == 'Glider'
