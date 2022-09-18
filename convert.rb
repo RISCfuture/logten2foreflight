@@ -1,6 +1,8 @@
 require 'csv'
 require 'bundler'
 Bundler.require
+require 'active_support/core_ext/enumerable'
+require 'active_support/core_ext/string/exclude'
 
 $/ = "\r\n"
 
@@ -60,7 +62,7 @@ def load_ltp_logbook_aircraft(ltp_logbook)
       ZAIRCRAFT_HIGHPERFORMANCE, ZAIRCRAFT_PRESSURIZED,
       ZAIRCRAFT_TECHNICALLYADVANCED
       FROM ZAIRCRAFT") do |(tail_number, type_id, year, amphib, floats, retract, skids, skis, tailwheel, radial, complex, hp, pressurized, taa)|
-    type_data                                                                                                          = db.execute("SELECT ZAIRCRAFTTYPE_TYPE, ZAIRCRAFTTYPE_MAKE,
+    type_data = db.execute("SELECT ZAIRCRAFTTYPE_TYPE, ZAIRCRAFTTYPE_MAKE,
         ZAIRCRAFTTYPE_MODEL, ZAIRCRAFTTYPE_CATEGORY, ZAIRCRAFTTYPE_AIRCRAFTCLASS,
         ZAIRCRAFTTYPE_ENGINETYPE, ZAIRCRAFTTYPE_CUSTOMATTRIBUTE1,
         ZAIRCRAFTTYPE_CUSTOMATTRIBUTE2, ZAIRCRAFTTYPE_CUSTOMATTRIBUTE3
@@ -194,11 +196,11 @@ def load_ltp_logbook_flights(ltp_logbook)
     approach_data     = db.execute("SELECT #{(1..10).map { |i| "ZAPPROACH_FLIGHTAPPROACHES#{i}" }.join(', ')},
         ZAPPROACH_TYPE, ZAPPROACH_COMMENT, ZAPPROACH_PLACE FROM ZAPPROACH
         WHERE Z_PK IN (#{approach_ids.join(', ')})")
-    approach_airports = db.execute("SELECT Z_PK, ZPLACE_ICAOID, ZPLACE_IDENTIFIER FROM ZPLACE WHERE Z_PK IN (#{approach_data.map { |a| a[12] }.compact.join(', ')})")
+    approach_airports = db.execute("SELECT Z_PK, ZPLACE_ICAOID, ZPLACE_IDENTIFIER FROM ZPLACE WHERE Z_PK IN (#{approach_data.filter_map { |a| a[12] }.join(', ')})")
 
     crew_data      = db.execute("SELECT ZFLIGHTCREW_PIC, ZFLIGHTCREW_SIC, ZFLIGHTCREW_INSTRUCTOR, ZFLIGHTCREW_STUDENT FROM ZFLIGHTCREW WHERE ZFLIGHTCREW_FLIGHT = #{flight_id}")[0]
     passenger_data = db.execute("SELECT #{(1..20).map { |i| "ZFLIGHTPASSENGERS_PAX#{i}" }.join(', ')} FROM ZFLIGHTPASSENGERS WHERE ZFLIGHTPASSENGERS_FLIGHT = #{flight_id}")[0].compact
-    people_data    = db.execute("SELECT Z_PK, ZPERSON_NAME, ZPERSON_EMAIL, ZPERSON_ISME FROM ZPERSON").each_with_object({}) { |p, hsh| hsh[p[0]] = p; }
+    people_data    = db.execute("SELECT Z_PK, ZPERSON_NAME, ZPERSON_EMAIL, ZPERSON_ISME FROM ZPERSON").index_by { |p| p[0] }
     my_id          = people_data.values.detect { |i| i[3] == 1 }[0]
 
     approaches = Array.new
@@ -222,7 +224,7 @@ def load_ltp_logbook_flights(ltp_logbook)
       picp = people_data[crew_data[0]]
       people << {name: picp[1], role: 'PIC', email: picp[2]}
     end
-    if crew_data[1] && crew_data[1] != my_id && !remarks.downcase.include?('safety pilot')
+    if crew_data[1] && crew_data[1] != my_id && remarks.downcase.exclude?('safety pilot')
       sicp = people_data[crew_data[1]]
       people << {name: sicp[1], role: 'SIC', email: sicp[2]}
     end
@@ -280,7 +282,7 @@ def load_ltp_logbook_flights(ltp_logbook)
         ground:               (ground || 0) / 60.0,
         instructor_name:      instructor,
         people:               people,
-        flight_review:        (bfr == 1 && !remarks.downcase.include?('checkride')),
+        flight_review:        (bfr == 1 && remarks.downcase.exclude?('checkride')),
         checkride:            (bfr == 1 && remarks.downcase.include?('checkride')),
         ipc:                  ipc == 1,
         remarks:              remarks
@@ -308,13 +310,15 @@ def print_header
   puts "ForeFlight Logbook Import,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
 end
 
+AIRCRAFT_NIL_FILLER = [nil] * 45
+
 def print_aircraft(aircraft)
   puts ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
   puts "Aircraft Table,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
 
   puts(CSV.generate do |csv|
-    csv << (%w[Text Text Text YYYY Text Text Text Text Text Text Boolean Boolean Boolean] + [nil] * 45)
-    csv << (%w[AircraftID EquipmentType TypeCode Year Make Model Category Class GearType EngineType Complex HighPerformance Pressurized] + [nil] * 45)
+    csv << (%w[Text Text Text YYYY Text Text Text Text Text Text Boolean Boolean Boolean] + AIRCRAFT_NIL_FILLER)
+    csv << (%w[AircraftID EquipmentType TypeCode Year Make Model Category Class GearType EngineType Complex HighPerformance Pressurized] + AIRCRAFT_NIL_FILLER)
 
     aircraft.sort_by { |a| a[:tail_number] }.each do |plane|
       csv << [
@@ -331,11 +335,13 @@ def print_aircraft(aircraft)
           plane[:complex] ? 'x' : nil,
           plane[:high_performance] ? 'x' : nil,
           plane[:pressurized] ? 'x' : nil,
-          *([nil] * 45)
+          *AIRCRAFT_NIL_FILLER
       ]
     end
   end)
 end
+
+FLIGHT_NIL_FILLER = [nil] * 6
 
 def print_flights(flights)
   puts ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
@@ -388,7 +394,7 @@ def print_flights(flights)
           flight[:flight_review] ? 'x' : nil,
           flight[:checkride] ? 'x' : nil,
           flight[:ipc] ? 'x' : nil,
-          *([nil] * 6), # custom fields
+          *FLIGHT_NIL_FILLER, # custom fields
           flight[:remarks]
       ]
     end
