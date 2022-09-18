@@ -41,7 +41,8 @@ AIRCRAFT_CLASSES = {
     321 => 'ASEL',
     146 => 'ASES',
     0   => 'FTD',
-    680 => 'AMEL'
+    680 => 'AMEL',
+    97  => 'AMES'
 }.freeze
 ENGINE_TYPES = {
     244 => 'Piston'
