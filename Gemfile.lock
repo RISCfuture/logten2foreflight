@@ -7,7 +7,7 @@ GEM
       minitest (>= 5.1)
       tzinfo (~> 2.0)
     concurrent-ruby (1.1.9)
-    i18n (1.8.11)
+    i18n (1.9.1)
       concurrent-ruby (~> 1.0)
     minitest (5.15.0)
     sqlite3 (1.4.2)
@@ -23,4 +23,4 @@ DEPENDENCIES
   sqlite3
 
 BUNDLED WITH
-   2.3.5
+   2.3.6

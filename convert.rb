@@ -83,13 +83,13 @@ def load_ltp_logbook_aircraft(ltp_logbook)
     end
 
     aircraft << {
-        tail_number:      tail_number,
-        type_code:        type_code,
-        year:             year,
-        make:             make,
-        model:            model,
-        equipment_type:   equipment_type,
-        category:         category,
+        tail_number:,
+        type_code:,
+        year:,
+        make:,
+        model:,
+        equipment_type:,
+        category:,
         class:            klass,
         gear_type:        gear_type(category_id == 100, amphib == 1, floats == 1, retract == 1, skids == 1, skis == 1, tailwheel == 1),
         engine_type:      engine_type(engine_type_id, radial == 1, make),
@@ -208,7 +208,7 @@ def load_ltp_logbook_flights(ltp_logbook)
       type = approach_type(data[10]) or next
       num                 = (1..10).detect { |i| data[i - 1] }
       approaches[num - 1] = {
-          type:    type,
+          type:,
           runway:  data[11],
           airport: approach_airports.detect { |a| a[0] == data[12] }&.slice(1..2)&.compact&.first
       }
@@ -260,7 +260,7 @@ def load_ltp_logbook_flights(ltp_logbook)
         solo:                 (solo || 0) / 60.0,
         night:                (night || 0) / 60.0,
         cross_country:        (xc || 0) / 60.0,
-        distance:             distance,
+        distance:,
         day_takeoffs:         day_to || 0,
         night_takeoffs:       night_to || 0,
         day_landings:         day_ldg || 0,
@@ -281,11 +281,11 @@ def load_ltp_logbook_flights(ltp_logbook)
         simulated:            (sim || 0) / 60.0,
         ground:               (ground || 0) / 60.0,
         instructor_name:      instructor,
-        people:               people,
+        people:,
         flight_review:        (bfr == 1 && remarks.downcase.exclude?('checkride')),
         checkride:            (bfr == 1 && remarks.downcase.include?('checkride')),
         ipc:                  ipc == 1,
-        remarks:              remarks
+        remarks:
     }
   end
 
