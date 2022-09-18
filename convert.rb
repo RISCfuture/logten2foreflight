@@ -44,7 +44,7 @@ AIRCRAFT_CLASSES = {
 }.freeze
 ENGINE_TYPES = {
     244 => 'Piston',
-    415 => 'Turbofan',
+    676 => 'Turbofan',
     507 => 'Non-Powered'
 }.freeze
 
