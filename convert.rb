@@ -37,13 +37,13 @@ AIRCRAFT_CATEGORIES = {
     100 => 'Simulator',
     581 => 'Glider'
 }.freeze
-AIRCRAFT_CLASSES    = {
+AIRCRAFT_CLASSES = {
     321 => 'ASEL',
     146 => 'ASES',
     0   => 'FTD',
     680 => 'AMEL'
 }.freeze
-ENGINE_TYPES        = {
+ENGINE_TYPES = {
     244 => 'Piston'
 }.freeze
 
@@ -145,7 +145,6 @@ def load_ltp_logbook_flights(ltp_logbook)
       ZFLIGHT_DUALRECEIVED, ZFLIGHT_SIMULATOR, ZFLIGHT_GROUND, ZFLIGHT_REMARKS,
       ZFLIGHT_REVIEW, ZFLIGHT_INSTRUMENTPROFICIENCYCHECK
       FROM ZFLIGHT") do |(flight_id, date, aircraft_id, from_id, to_id, route, time_out, time_in, on, off, total_time, pic, sic, night, solo, xc, distance, day_to, day_ldg, night_to, night_ldg, full_stops, night_full_stops, actual, sim_inst, hobbs_out, hobbs_in, tach_out, tach_in, holds, dual_given, dual_received, sim, ground, remarks, bfr, ipc)|
-
     next unless aircraft_id
 
     aircraft_data = db.execute("SELECT ZAIRCRAFT_AIRCRAFTID FROM ZAIRCRAFT WHERE Z_PK = #{aircraft_id}")[0]
