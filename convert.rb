@@ -183,7 +183,7 @@ def load_ltp_logbook_flights(ltp_logbook)
     instructor = crew_data[2] ? people_data[crew_data[2]][1] : nil
 
     people = Array.new
-    if remarks && remarks.downcase.include?('safety pilot') && crew_data[0] == my_id && crew_data[1]
+    if remarks&.downcase&.include?('safety pilot') && crew_data[0] == my_id && crew_data[1]
       safety = people_data[crew_data[1]]
       people << {name: safety[1], role: 'Safety Pilot', email: safety[2]}
     elsif crew_data[0] && crew_data[0] != my_id && crew_data[0] != crew_data[2]
@@ -198,7 +198,7 @@ def load_ltp_logbook_flights(ltp_logbook)
       student = people_data[crew_data[3]]
       people << {name: student[1], role: 'Student', email: student[2]}
     end
-    if remarks && remarks.downcase.include?('checkride') && passenger_data.size == 1
+    if remarks&.downcase&.include?('checkride') && passenger_data.size == 1
       examiner = people_data[passenger_data.first]
       people << {name: examiner[1], role: 'Examiner', email: examiner[2]}
     else
