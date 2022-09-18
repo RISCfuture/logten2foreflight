@@ -45,7 +45,8 @@ AIRCRAFT_CLASSES    = {
     97  => 'AMES'
 }.freeze
 ENGINE_TYPES        = {
-    244 => 'Piston'
+    244 => 'Piston',
+    415 => 'Turbofan'
 }.freeze
 
 def load_ltp_logbook_aircraft(ltp_logbook)
