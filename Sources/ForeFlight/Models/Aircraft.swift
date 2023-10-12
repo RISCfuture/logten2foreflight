@@ -1,20 +1,20 @@
 import Foundation
 
-public struct Aircraft {
-    public private(set) var tailNumber: String?
-    public private(set) var simulatorType: SimulatorType
-    public private(set) var typeCode: String?
-    public private(set) var year: UInt?
-    public private(set) var make: String
-    public private(set) var model: String
-    public private(set) var category: Category
-    public private(set) var `class`: Class?
-    public private(set) var gearType: GearType?
-    public private(set) var engineType: EngineType?
-    public private(set) var complex: Bool
-    public private(set) var highPerformance: Bool
-    public private(set) var pressurized: Bool
-    public private(set) var technicallyAdvanced: Bool
+package struct Aircraft {
+    package private(set) var tailNumber: String?
+    package private(set) var simulatorType: SimulatorType
+    package private(set) var typeCode: String?
+    package private(set) var year: UInt?
+    package private(set) var make: String
+    package private(set) var model: String
+    package private(set) var category: Category
+    package private(set) var `class`: Class?
+    package private(set) var gearType: GearType?
+    package private(set) var engineType: EngineType?
+    package private(set) var complex: Bool
+    package private(set) var highPerformance: Bool
+    package private(set) var pressurized: Bool
+    package private(set) var technicallyAdvanced: Bool
     
     static let fieldMapping: Dictionary<String, PartialKeyPath<Self>> = [
         "AircraftID": \.tailNumber,
@@ -33,7 +33,7 @@ public struct Aircraft {
         "TAA": \.technicallyAdvanced
     ]
     
-    public init(tailNumber: String,
+    package init(tailNumber: String,
                 simulatorType: SimulatorType,
                 typeCode: String?,
                 year: UInt? = nil,
@@ -64,7 +64,7 @@ public struct Aircraft {
     }
     
     
-    public enum GearType: String {
+    package enum GearType: String {
         case amphibian = "AM"
         case floats = "FL"
         case skids = "Skids"
@@ -75,7 +75,7 @@ public struct Aircraft {
         case retractableTricycle = "RT"
     }
     
-    public enum EngineType: String {
+    package enum EngineType: String {
         case piston = "Piston"
         case turbofan = "Turbofan"
         case radial = "Radial"
@@ -83,7 +83,7 @@ public struct Aircraft {
         case nonpowered = "Non-Powered"
     }
     
-    public enum SimulatorType: String {
+    package enum SimulatorType: String {
         case aircraft
         case FFS = "ffs"
         case FTD = "ftd"
@@ -91,7 +91,7 @@ public struct Aircraft {
         case BATD = "batd"
     }
     
-    public enum Category: String {
+    package enum Category: String {
         case airplane = "Airplane"
         case rotorcraft = "Rotorcraft"
         case glider = "Glider"
@@ -102,7 +102,7 @@ public struct Aircraft {
         case simulator = "Simulator"
     }
     
-    public enum Class: String {
+    package enum Class: String {
         case singleEngineLand = "ASEL"
         case multiEngineLand = "AMEL"
         case singleEngineSea = "ASES"

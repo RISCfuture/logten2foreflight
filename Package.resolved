@@ -15,7 +15,7 @@
       "location" : "https://github.com/groue/GRDB.swift.git",
       "state" : {
         "branch" : "master",
-        "revision" : "9e3eebf4c276efb8690bdeb13158bff321ae5fcf"
+        "revision" : "181ccd8d7dbeaf7ba0fe6c4f752fb14b2be4f550"
       }
     },
     {
@@ -24,7 +24,7 @@
       "location" : "https://github.com/apple/swift-argument-parser",
       "state" : {
         "branch" : "main",
-        "revision" : "841b8538e4ff1ef669b87aa213038a750c4c6bce"
+        "revision" : "6c7ec363da47357aaf1f2f423d30117ff077f696"
       }
     },
     {
@@ -33,7 +33,7 @@
       "location" : "https://github.com/apple/swift-log.git",
       "state" : {
         "branch" : "main",
-        "revision" : "f7b7977065532aaaad64407b204f4b6dc1795703"
+        "revision" : "e97a6fcb1ab07462881ac165fdbb37f067e205d5"
       }
     }
   ],

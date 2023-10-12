@@ -39,7 +39,7 @@ extension Reader {
             ON ZAIRCRAFTTYPE.Z_PK = ZAIRCRAFT_AIRCRAFTTYPE
     """
     
-    public func getAircraft() throws -> Array<Aircraft> {
+    package func getAircraft() throws -> Array<Aircraft> {
         var aircraft = Array<Aircraft>()
         
         try dbQueue.read { db in

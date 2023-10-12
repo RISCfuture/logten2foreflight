@@ -1,122 +1,122 @@
 import Foundation
 
-public struct Entry {
-    public private(set) var date: Date
-    public private(set) var out: Date? = nil
-    public private(set) var off: Date? = nil
-    public private(set) var on: Date? = nil
-    public private(set) var `in`: Date? = nil
-    public private(set) var onDuty: Date? = nil
-    public private(set) var offDuty: Date? = nil
-    public private(set) var hobbsStart: Double?
-    public private(set) var hobbsEnd: Double? = nil
-    public private(set) var tachStart: Double? = nil
-    public private(set) var tachEnd: Double? = nil
+package struct Entry {
+    package private(set) var date: Date
+    package private(set) var out: Date? = nil
+    package private(set) var off: Date? = nil
+    package private(set) var on: Date? = nil
+    package private(set) var `in`: Date? = nil
+    package private(set) var onDuty: Date? = nil
+    package private(set) var offDuty: Date? = nil
+    package private(set) var hobbsStart: Double?
+    package private(set) var hobbsEnd: Double? = nil
+    package private(set) var tachStart: Double? = nil
+    package private(set) var tachEnd: Double? = nil
     
-    public private(set) var aircraft: String?
+    package private(set) var aircraft: String?
     
-    public private(set) var from: String?
-    public private(set) var to: String?
-    public private(set) var route: String? = nil
-    public private(set) var distance: Double? = nil
+    package private(set) var from: String?
+    package private(set) var to: String?
+    package private(set) var route: String? = nil
+    package private(set) var distance: Double? = nil
     
-    public private(set) var totalTime: UInt = 0 // minutes
-    public private(set) var PICTime: UInt = 0 // minutes
-    public private(set) var SICTime: UInt = 0 // minutes
-    public private(set) var soloTime: UInt = 0 // minutes
-    public private(set) var nightTime: UInt = 0 // minutes
-    public private(set) var crossCountryTime: UInt = 0 // minutes
-    public private(set) var dualGivenTime: UInt = 0 // minutes
-    public private(set) var dualReceivedTime: UInt = 0 // minutes
-    public private(set) var actualInstrumentTime: UInt = 0 // minutes
-    public private(set) var simulatedInstrumentTime: UInt = 0 // minutes
-    public private(set) var simulatorTime: UInt = 0 // minutes
-    public private(set) var groundTime: UInt = 0 // minutes
-    public private(set) var NVGTime: UInt = 0 // minutes
+    package private(set) var totalTime: UInt = 0 // minutes
+    package private(set) var PICTime: UInt = 0 // minutes
+    package private(set) var SICTime: UInt = 0 // minutes
+    package private(set) var soloTime: UInt = 0 // minutes
+    package private(set) var nightTime: UInt = 0 // minutes
+    package private(set) var crossCountryTime: UInt = 0 // minutes
+    package private(set) var dualGivenTime: UInt = 0 // minutes
+    package private(set) var dualReceivedTime: UInt = 0 // minutes
+    package private(set) var actualInstrumentTime: UInt = 0 // minutes
+    package private(set) var simulatedInstrumentTime: UInt = 0 // minutes
+    package private(set) var simulatorTime: UInt = 0 // minutes
+    package private(set) var groundTime: UInt = 0 // minutes
+    package private(set) var NVGTime: UInt = 0 // minutes
     
-    public private(set) var takeoffsDay: UInt = 0
-    public private(set) var takeoffsNight: UInt = 0
-    public private(set) var landingsDay: UInt = 0
-    public private(set) var landingsNight: UInt = 0
-    public private(set) var landingsFullStop: UInt = 0
-    public private(set) var landingsNightFullStop: UInt = 0
-    public private(set) var takeoffsNVG: UInt = 0
-    public private(set) var landingsNVG: UInt = 0
+    package private(set) var takeoffsDay: UInt = 0
+    package private(set) var takeoffsNight: UInt = 0
+    package private(set) var landingsDay: UInt = 0
+    package private(set) var landingsNight: UInt = 0
+    package private(set) var landingsFullStop: UInt = 0
+    package private(set) var landingsNightFullStop: UInt = 0
+    package private(set) var takeoffsNVG: UInt = 0
+    package private(set) var landingsNVG: UInt = 0
     
-    public private(set) var holds: UInt = 0
-    public private(set) var approaches: Array<Approach> = []
+    package private(set) var holds: UInt = 0
+    package private(set) var approaches: Array<Approach> = []
     
-    public private(set) var members: Array<Member> = []
+    package private(set) var members: Array<Member> = []
     
-    public private(set) var flightReview = false
-    public private(set) var IPC = false
-    public private(set) var proficiencyCheck = false
+    package private(set) var flightReview = false
+    package private(set) var IPC = false
+    package private(set) var proficiencyCheck = false
     
-    public private(set) var remarks: String? = nil
+    package private(set) var remarks: String? = nil
     
-    public var landingsAll: UInt { landingsDay + landingsNight }
-    public var landingsDayFullStop: UInt { landingsFullStop - landingsNightFullStop }
+    package var landingsAll: UInt { landingsDay + landingsNight }
+    package var landingsDayFullStop: UInt { landingsFullStop - landingsNightFullStop }
     
-    public var dutyTime: TimeInterval? {
+    package var dutyTime: TimeInterval? {
         guard let onDuty = onDuty else { return nil }
         guard let offDuty = offDuty else { return nil }
         return offDuty.timeIntervalSince(onDuty)
     }
     
-    public var dutyHours: Double? {
+    package var dutyHours: Double? {
         guard let dutyTime = dutyTime else { return nil }
         return dutyTime / 3600
     }
     
-    public var blockTime: TimeInterval? {
+    package var blockTime: TimeInterval? {
         guard let out = out else { return nil }
         guard let `in` = `in` else { return nil }
         return `in`.timeIntervalSince(out)
     }
     
-    public var blockHours: Double? {
+    package var blockHours: Double? {
         guard let blockTime = blockTime else { return nil }
         return blockTime / 3600
     }
     
-    public var flightTime: TimeInterval? {
+    package var flightTime: TimeInterval? {
         guard let off = off else { return nil }
         guard let on = on else { return nil }
         return on.timeIntervalSince(off)
     }
     
-    public var flightHours: Double? {
+    package var flightHours: Double? {
         guard let flightTime = flightTime else { return nil }
         return flightTime / 3600
     }
     
-    public var totalHours: Double { Double(totalTime)/60 }
-    public var PICHours: Double { Double(PICTime)/60 }
-    public var SICHours: Double { Double(SICTime)/60 }
-    public var soloHours: Double { Double(soloTime)/60 }
-    public var nightHours: Double { Double(nightTime)/60 }
-    public var crossCountryHours: Double { Double(crossCountryTime)/60 }
-    public var dualGivenHours: Double { Double(dualGivenTime)/60 }
-    public var dualReceivedHours: Double { Double(dualReceivedTime)/60 }
-    public var actualInstrumentHours: Double { Double(actualInstrumentTime)/60 }
-    public var simulatedInstrumentHours: Double { Double(simulatedInstrumentTime)/60 }
-    public var simulatorHours: Double { Double(simulatorTime)/60 }
-    public var groundHours: Double { Double(groundTime)/60 }
-    public var NVGHours: Double { Double(NVGTime)/60 }
+    package var totalHours: Double { Double(totalTime)/60 }
+    package var PICHours: Double { Double(PICTime)/60 }
+    package var SICHours: Double { Double(SICTime)/60 }
+    package var soloHours: Double { Double(soloTime)/60 }
+    package var nightHours: Double { Double(nightTime)/60 }
+    package var crossCountryHours: Double { Double(crossCountryTime)/60 }
+    package var dualGivenHours: Double { Double(dualGivenTime)/60 }
+    package var dualReceivedHours: Double { Double(dualReceivedTime)/60 }
+    package var actualInstrumentHours: Double { Double(actualInstrumentTime)/60 }
+    package var simulatedInstrumentHours: Double { Double(simulatedInstrumentTime)/60 }
+    package var simulatorHours: Double { Double(simulatorTime)/60 }
+    package var groundHours: Double { Double(groundTime)/60 }
+    package var NVGHours: Double { Double(NVGTime)/60 }
     
-    public var approachCount: UInt {
+    package var approachCount: UInt {
         approaches.reduce(0) { $0 + $1.count }
     }
     
-    public var PIC: Person? { members.first(where: { $0.role == .PIC })?.person }
-    public var SIC: Person? { members.first(where: { $0.role == .SIC })?.person }
-    public var instructor: Person? { members.first(where: { $0.role == .instructor })?.person }
-    public var student: Person? { members.first(where: { $0.role == .student })?.person }
-    public var safetyPilot: Person? { members.first(where: { $0.role == .safetyPilot })?.person }
-    public var examiner: Person? { members.first(where: { $0.role == .examiner })?.person }
-    public var passengers: Array<Person> { members.filter { $0.role == .passenger }.map { $0.person } }
+    package var PIC: Person? { members.first(where: { $0.role == .PIC })?.person }
+    package var SIC: Person? { members.first(where: { $0.role == .SIC })?.person }
+    package var instructor: Person? { members.first(where: { $0.role == .instructor })?.person }
+    package var student: Person? { members.first(where: { $0.role == .student })?.person }
+    package var safetyPilot: Person? { members.first(where: { $0.role == .safetyPilot })?.person }
+    package var examiner: Person? { members.first(where: { $0.role == .examiner })?.person }
+    package var passengers: Array<Person> { members.filter { $0.role == .passenger }.map { $0.person } }
     
-    public enum ApproachType: String, RawRepresentable {
+    package enum ApproachType: String, RawRepresentable {
         case GCA
         case GLS
         case GPS_GNSS = "GPS/GNSS"
@@ -151,14 +151,14 @@ public struct Entry {
         case VOR_DME = "VOR/DME"
     }
     
-    public struct Approach: Hashable {
-        public private(set) var type: ApproachType
-        public private(set) var runway: String?
-        public private(set) var airport: String
-        public private(set) var count: UInt
+    package struct Approach: Hashable {
+        package private(set) var type: ApproachType
+        package private(set) var runway: String?
+        package private(set) var airport: String
+        package private(set) var count: UInt
     }
     
-    public enum Role {
+    package enum Role {
         case PIC
         case SIC
         case instructor
@@ -168,8 +168,8 @@ public struct Entry {
         case examiner
     }
     
-    public struct Member {
-        public private(set) var person: Person
-        public private(set) var role: Role
+    package struct Member {
+        package private(set) var person: Person
+        package private(set) var role: Role
     }
 }

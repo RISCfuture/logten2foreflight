@@ -1,14 +1,14 @@
 import Foundation
 import CodableCSV
 
-public class Writer {
-    public let logbook: Logbook
+package class Writer {
+    package let logbook: Logbook
     
-    public init(logbook: Logbook) {
+    package init(logbook: Logbook) {
         self.logbook = logbook
     }
     
-    public func write(to file: URL) throws {
+    package func write(to file: URL) throws {
         let writer = try CSVWriter(fileURL: file)
         let template = Template.shared
         

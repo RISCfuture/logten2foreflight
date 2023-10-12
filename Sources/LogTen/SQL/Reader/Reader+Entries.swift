@@ -89,7 +89,7 @@ extension Reader {
         ON ZFLIGHTPASSENGERS.ZFLIGHTPASSENGERS_FLIGHT = ZFLIGHT.Z_PK
     """
     
-    public func getEntries(people: Dictionary<Int64, Person>? = nil) throws -> Array<Entry> {
+    package func getEntries(people: Dictionary<Int64, Person>? = nil) throws -> Array<Entry> {
         let people = try people ?? getPeople()
         var entries = Array<Entry>()
         

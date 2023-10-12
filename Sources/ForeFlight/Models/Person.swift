@@ -1,10 +1,10 @@
 import Foundation
 
-public struct Person {
-    public private(set) var name: String
-    public private(set) var email: String?
+package struct Person {
+    package private(set) var name: String
+    package private(set) var email: String?
     
-    public init(name: String, email: String? = nil) {
+    package init(name: String, email: String? = nil) {
         self.name = name
         self.email = email
     }

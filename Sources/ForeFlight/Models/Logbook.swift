@@ -1,9 +1,9 @@
 import Foundation
 
 public struct Logbook {
-    public var entries = Array<Entry>()
-    public var aircraft = Array<Aircraft>()
-    public var people = Array<Person>()
+    package var entries = Array<Entry>()
+    package var aircraft = Array<Aircraft>()
+    package var people = Array<Person>()
     
-    public init() {}
+    package init() {}
 }

@@ -1,63 +1,63 @@
 import Foundation
 
-public struct Entry {
-    public private(set) var date: Date
-    public private(set) var aircraftID: String?
+package struct Entry {
+    package private(set) var date: Date
+    package private(set) var aircraftID: String?
     
-    public private(set) var from: String?
-    public private(set) var to: String?
-    public private(set) var route: String?
+    package private(set) var from: String?
+    package private(set) var to: String?
+    package private(set) var route: String?
     
-    public private(set) var out: Date?
-    public private(set) var off: Date?
-    public private(set) var on: Date?
-    public private(set) var `in`: Date?
-    public private(set) var onDuty: Date?
-    public private(set) var offDuty: Date?
+    package private(set) var out: Date?
+    package private(set) var off: Date?
+    package private(set) var on: Date?
+    package private(set) var `in`: Date?
+    package private(set) var onDuty: Date?
+    package private(set) var offDuty: Date?
     
-    public private(set) var totalTime = 0.0
-    public private(set) var PICTime = 0.0
-    public private(set) var SICTime = 0.0
-    public private(set) var nightTime = 0.0
-    public private(set) var soloTime = 0.0
-    public private(set) var crossCountryTime = 0.0
-    public private(set) var NVGTime = 0.0
+    package private(set) var totalTime = 0.0
+    package private(set) var PICTime = 0.0
+    package private(set) var SICTime = 0.0
+    package private(set) var nightTime = 0.0
+    package private(set) var soloTime = 0.0
+    package private(set) var crossCountryTime = 0.0
+    package private(set) var NVGTime = 0.0
     
-    public private(set) var NVGOps: UInt = 0
+    package private(set) var NVGOps: UInt = 0
     
-    public private(set) var distance: Double?
+    package private(set) var distance: Double?
     
-    public private(set) var takeoffsDay: UInt = 0
-    public private(set) var landingsDayFullStop: UInt = 0
-    public private(set) var takeoffsNight: UInt = 0
-    public private(set) var landingsNightFullStop: UInt = 0
-    public private(set) var landingsAll: UInt = 0
+    package private(set) var takeoffsDay: UInt = 0
+    package private(set) var landingsDayFullStop: UInt = 0
+    package private(set) var takeoffsNight: UInt = 0
+    package private(set) var landingsNightFullStop: UInt = 0
+    package private(set) var landingsAll: UInt = 0
     
-    public private(set) var actualInstrumentTime = 0.0
-    public private(set) var simulatedInstrumentTime = 0.0
+    package private(set) var actualInstrumentTime = 0.0
+    package private(set) var simulatedInstrumentTime = 0.0
     
-    public private(set) var hobbsStart: Double?
-    public private(set) var hobbsEnd: Double?
-    public private(set) var tachStart: Double?
-    public private(set) var tachEnd: Double?
+    package private(set) var hobbsStart: Double?
+    package private(set) var hobbsEnd: Double?
+    package private(set) var tachStart: Double?
+    package private(set) var tachEnd: Double?
     
-    public private(set) var holds: UInt = 0
-    public private(set) var approaches = Array<Approach>()
+    package private(set) var holds: UInt = 0
+    package private(set) var approaches = Array<Approach>()
     
-    public private(set) var dualGiven = 0.0
-    public private(set) var dualReceived = 0.0
-    public private(set) var simulatorTime = 0.0
-    public private(set) var groundTime = 0.0
+    package private(set) var dualGiven = 0.0
+    package private(set) var dualReceived = 0.0
+    package private(set) var simulatorTime = 0.0
+    package private(set) var groundTime = 0.0
     
-    public private(set) var people = Array<Member>()
+    package private(set) var people = Array<Member>()
     
-    public private(set) var flightReview = false
-    public private(set) var checkride = false
-    public private(set) var IPC = false
-    public private(set) var NVGProficiency = false
-    public private(set) var recurrent = false
+    package private(set) var flightReview = false
+    package private(set) var checkride = false
+    package private(set) var IPC = false
+    package private(set) var NVGProficiency = false
+    package private(set) var recurrent = false
     
-    public private(set) var remarks: String?
+    package private(set) var remarks: String?
     
     var dateFormatted: DateOnly { .init(date) }
     var outFormatted: TimeOnly? {
@@ -151,7 +151,7 @@ public struct Entry {
         "PilotComments": \.remarks
     ]
     
-    public init(date: Date,
+    package init(date: Date,
                 aircraftID: String? = nil,
                 from: String? = nil,
                 to: String? = nil,
@@ -241,14 +241,14 @@ public struct Entry {
         self.remarks = remarks
     }
     
-    public struct Approach {
-        public private(set) var count: UInt
-        public private(set) var type: ApproachType
-        public private(set) var runway: String?
-        public private(set) var airport: String
-        public private(set) var comments: String?
+    package struct Approach {
+        package private(set) var count: UInt
+        package private(set) var type: ApproachType
+        package private(set) var runway: String?
+        package private(set) var airport: String
+        package private(set) var comments: String?
         
-        public init(count: UInt,
+        package init(count: UInt,
                     type: Entry.ApproachType,
                     runway: String? = nil,
                     airport: String,
@@ -261,7 +261,7 @@ public struct Entry {
         }
     }
     
-    public enum ApproachType: String {
+    package enum ApproachType: String {
         case ASR_SRA = "ASR/SRA"
         case GCA
         case GLS
@@ -281,17 +281,17 @@ public struct Entry {
         case VOR
     }
     
-    public struct Member {
-        public private(set) var person: Person
-        public private(set) var role: Role
+    package struct Member {
+        package private(set) var person: Person
+        package private(set) var role: Role
         
-        public init(person: Person, role: Entry.Role) {
+        package init(person: Person, role: Entry.Role) {
             self.person = person
             self.role = role
         }
     }
     
-    public enum Role: String {
+    package enum Role: String {
         case PIC
         case SIC
         case instructor = "Instructor"
