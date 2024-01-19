@@ -7,7 +7,7 @@ import libLogTenToForeFlight
 
 @main
 struct LogtenToForeflight: ParsableCommand {
-    private static let logtenDataStorePath = "Library/Containers/com.coradine.LogTenProX/Data/Documents/LogTenProData/LogTenCoreDataStore.sql"
+    private static let logtenDataStorePath = "Library/Group Containers/group.com.coradine.LogTenPro/LogTenProData_6583aa561ec1cc91302449b5/LogTenCoreDataStore.sql"
     
     private static var logtenDataStoreURL: URL {
         let homeDir = FileManager.default.homeDirectoryForCurrentUser

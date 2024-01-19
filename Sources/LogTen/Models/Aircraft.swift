@@ -36,22 +36,22 @@ package struct Aircraft {
     }
     
     package enum Category: Int64, RawRepresentable {
-        case airplane = 210
-        case glider = 581
-        case simulator = 100
+        case airplane = 175
+        case glider = 625
+        case simulator = 216
     }
     
     package enum Class: Int64, RawRepresentable {
-        case airplaneSingleEngineLand = 321
-        case airplaneSingleEngineSea = 146
-        case airplaneMultiEngineLand = 680
-        case airplaneMultiEngineSea = 97
+        case airplaneSingleEngineLand = 363
+        case airplaneSingleEngineSea = 616
+        case airplaneMultiEngineLand = 669
+        case airplaneMultiEngineSea = 415
     }
     
     package enum EngineType: Int64, RawRepresentable {
-        case piston = 244
-        case turbofan = 676
-        case nonpowered = 507
+        case piston = 419
+        case turbofan = 305
+        case nonpowered = 468
     }
     
     package enum SimulatorType: String, RawRepresentable {

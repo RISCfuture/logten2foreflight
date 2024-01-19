@@ -2,7 +2,7 @@ import Foundation
 import GRDB
 
 extension Reader {
-    private static let type = EnumQueryField<String, Entry.ApproachType>(name: "ZAPPROACH_TYPE")
+    private static let type = OptionalEnumQueryField<String, Entry.ApproachType>(name: "ZAPPROACH_TYPE")
     private static let runway = RawQueryField<String>(name: "ZAPPROACH_COMMENT")
     private static let airportIdent = RawQueryField<String>(name: "ZPLACE_IDENTIFIER")
     private static let airportICAO = OptionalQueryField<String>(name: "ZPLACE_ICAOID")
@@ -26,7 +26,7 @@ extension Reader {
         
         let rows = try Row.fetchCursor(db, sql: Self.query.replacingOccurrences(of: ":ids", with: IDsString))
         while let row = try rows.next() {
-            let type = try Self.type.value(from: row)
+            guard let type = try Self.type.value(from: row) else { continue }
             let runway = try Self.runway.value(from: row)
             let airportIdent = try Self.airportIdent.value(from: row)
             let airportICAO = try Self.airportICAO.value(from: row)
