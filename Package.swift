@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 5.10
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "LogTenToForeFlight",
     platforms: [.macOS(.v14)],
-    
+
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(name: "libLogTenToForeFlight", targets: ["libLogTenToForeFlight"]),
@@ -14,7 +14,7 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/apple/swift-argument-parser", branch: "main"),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", branch: "main"),
         .package(url: "https://github.com/apple/swift-log.git", branch: "main"),
         .package(url: "https://github.com/groue/GRDB.swift.git", branch: "master"),
         .package(url: "https://github.com/dehesa/CodableCSV.git", branch: "master")
@@ -51,6 +51,6 @@ let package = Package(
             name: "LogTenToForeFlightTests",
             dependencies: ["libLogTenToForeFlight"])
     ],
-    
+
     swiftLanguageVersions: [.v5]
 )

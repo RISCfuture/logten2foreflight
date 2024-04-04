@@ -22,8 +22,8 @@ struct LogtenToForeflight: ParsableCommand {
     @Argument(help: "The ForeFlight logbook.csv file to create.",
               completion: .file(extensions: ["csv"]),
               transform: URL.init(fileURLWithPath:))
-    var foreflightFile
-    
+    var foreflightFile: URL
+
     @Flag(help: "Include extra information in the output.")
     var verbose = false
     
