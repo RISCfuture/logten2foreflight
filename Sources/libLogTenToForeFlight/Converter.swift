@@ -7,24 +7,27 @@ public class Converter {
     
     private static let dieselAircraft = ["DA42", "DA62"]
     private static let typeOverrides = [
-        "C-152": "C152",
-        "C-172": "C172",
-        "C-182": "C182",
-        "PA-22": "PA22",
-        "PA-28-": "P28A",
-        "PA-28R": "P28R",
-        "PA-34": "PA34",
-        "SR22-": "SR22",
-        "SR22N-": "SR22",
-        "SR22T-": "S22T",
-        "SF50-": "SF50",
-        "C-T182": "C82T",
-        "G-44": "G44",
         "2-33": "S233",
         "7ECA": "CH7A",
         "7GCBC": "CH7B",
         "8KCAB": "BL8",
-        "FRASCA 142": nil
+        "A320-": "A320",
+        "B738-": "B738",
+        "C-152": "C152",
+        "C-172": "C172",
+        "C-182": "C182",
+        "C-T182": "C82T",
+        "E145-": "E145",
+        "FRASCA 142": nil,
+        "G-44": "G44",
+        "PA-22": "PA22",
+        "PA-28-": "P28A",
+        "PA-28R": "P28R",
+        "PA-34": "PA34",
+        "SF50-": "SF50",
+        "SR22-": "SR22",
+        "SR22N-": "SR22",
+        "SR22T-": "S22T"
     ]
     
     public init(logbook: LogTen.Logbook) {
