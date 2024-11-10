@@ -1,24 +1,16 @@
 import Foundation
-import CodableCSV
+@preconcurrency import CodableCSV
 
 class Template {
     private let templateURL = Bundle.module.url(forResource: "logbook_template", withExtension: "csv")!
-    static let shared = Template()
-    var rows = Array<Row>()
     
-    private init() {
-        do {
-            try buildRows()
-        } catch {
-            fatalError(error.localizedDescription)
-        }
-    }
-    
-    private func buildRows() throws {
+    func buildRows() throws -> Array<Row> {
         let reader = try CSVReader(input: templateURL)
         
-        var aircraftFieldsRow: Array<String>!
-        var entryFieldsRow: Array<String>!
+        
+        var aircraftFieldsRow: Array<String>!,
+            entryFieldsRow: Array<String>!,
+            rows = Array<Row>()
         
         while let row = try reader.readRow() {
             switch row.first {
@@ -36,19 +28,23 @@ class Template {
                 default: fatalError("Unknown row type ‘\(String(describing: row.first))’")
             }
         }
+        
+        return rows
     }
     
     private func aircraftFields(from row: Array<String>) -> Array<PartialKeyPath<Aircraft>> {
-        row.compactMap { fieldName in
-            guard !fieldName.isEmpty else { return nil }
+        var fields = Array<PartialKeyPath<Aircraft>>()
+        for fieldName in row {
+            guard !fieldName.isEmpty else { continue }
             guard let field = Aircraft.fieldMapping[fieldName] else { fatalError("No var on Aircraft for \(fieldName)") }
-            return field
+            fields.append(field)
         }
+        return fields
     }
     
-    private func entryFields(from row: Array<String>) -> Array<PartialKeyPath<Entry>?> {
+    private func entryFields(from row: Array<String>) -> Array<PartialKeyPath<Flight>?> {
         row.map { fieldName in
-            guard let field = Entry.fieldMapping[fieldName] else { fatalError("No var on Entry for \(fieldName)") }
+            guard let field = Flight.fieldMapping[fieldName] else { fatalError("No var on Flight for \(fieldName)") }
             return field
         }
     }
@@ -56,6 +52,6 @@ class Template {
     enum Row {
         case `static`(values: Array<String>)
         case aircraft(fields: Array<PartialKeyPath<Aircraft>?>)
-        case entries(fields: Array<PartialKeyPath<Entry>?>)
+        case entries(fields: Array<PartialKeyPath<Flight>?>)
     }
 }

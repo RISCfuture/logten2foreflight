@@ -1,71 +1,41 @@
 import Foundation
+@preconcurrency import GRDB
+import LogTenToForeFlightMacros
 
-package struct Aircraft {
-    package private(set) var tailNumber: String
+@QueryObject
+package struct Aircraft: Model, Identifiable, Equatable, Hashable {
+    
+    // MARK: Columns
+    
+    @QueryField(column: "Z_PK") package let id: Int64
+    @QueryField(column: "ZAIRCRAFT_AIRCRAFTTYPE") package let typeID: Int64
+    @QueryField(column: "ZAIRCRAFT_AIRCRAFTID") package let tailNumber: String
 
-    package private(set) var typeCode: String
-    package private(set) var make: String
-    package private(set) var model: String
-    private(set) var yearDate: Date? = nil
-    package private(set) var category: Category
-    package private(set) var `class`: Class? = nil
-    package private(set) var complex = false
-    package private(set) var highPerformance = false
-    package private(set) var pressurized = false
-    package private(set) var technicallyAdvanced = false
+    @QueryField(column: "ZAIRCRAFT_YEAR", convert: { Self.parseDate($0) }) let yearDate: Date?
+    @QueryField(column: "ZAIRCRAFT_COMPLEX") package let complex: Bool
+    @QueryField(column: "ZAIRCRAFT_HIGHPERFORMANCE") package let highPerformance: Bool
+    @QueryField(column: "ZAIRCRAFT_PRESSURIZED") package let pressurized: Bool
+    @QueryField(column: "ZAIRCRAFT_TECHNICALLYADVANCED") package let technicallyAdvanced: Bool
 
-    package private(set) var simulatorType: SimulatorType? = nil
-    package private(set) var simulatedAircraftType: String? = nil
-    package private(set) var simulatedAircraftCategory: SimulatorCategoryClass? = nil
+    @QueryField(column: "ZAIRCRAFT_UNDERCARRIAGERETRACTABLE") package let retractableGear: Bool
+    @QueryField(column: "ZAIRCRAFT_UNDERCARRIAGEAMPHIB") package let amphibious: Bool
+    @QueryField(column: "ZAIRCRAFT_UNDERCARRIAGEFLOATS") package let floats: Bool
+    @QueryField(column: "ZAIRCRAFT_UNDERCARRIAGESKIS") package let skis: Bool
+    @QueryField(column: "ZAIRCRAFT_UNDERCARRIAGESKIDS") package let skids: Bool
+    @QueryField(column: "ZAIRCRAFT_TAILWHEEL") package let tailwheel: Bool
 
-    package private(set) var retractableGear = false
-    package private(set) var amphibious = false
-    package private(set) var floats = false
-    package private(set) var skis = false
-    package private(set) var skids = false
-    package private(set) var tailwheel = false
+    @QueryField(column: "ZAIRCRAFT_RADIALENGINE") package let radial: Bool
 
-    package private(set) var engineType: EngineType? = nil
-    package private(set) var radial = false
-
+    // MARK: Computed properties
+    
     package var year: UInt? {
         guard let yearDate = yearDate else { return nil }
         let components = Calendar.current.dateComponents(in: zulu, from: yearDate)
         guard let year = components.year else { return nil }
         return UInt(year)
     }
-
-    package enum Category: Int64, RawRepresentable {
-        case airplane = 124
-        case glider = 554
-        case simulator = 540
-    }
-
-    package enum Class: Int64, RawRepresentable {
-        case airplaneSingleEngineLand = 361
-        case airplaneSingleEngineSea = 349
-        case airplaneMultiEngineLand = 367
-        case airplaneMultiEngineSea = 355
-    }
-
-    package enum EngineType: Int64, RawRepresentable {
-        case piston = 185
-        case turbofan = 167
-        case nonpowered = 179
-    }
-
-    package enum SimulatorType: String, RawRepresentable {
-        case BATD
-        case AATD
-        case FTD
-        case FFS
-    }
-
-    package enum SimulatorCategoryClass: String, RawRepresentable {
-        case airplaneSingleEngineLand = "ASEL"
-        case airplaneSingleEngineSea = "ASES"
-        case airplaneMultiEngineLand = "AMEL"
-        case airplaneMultiEngineSea = "AMES"
-        case glider = "GL"
-    }
+    
+    // MARK: Database configuration
+    
+    static package let databaseTableName = "ZAIRCRAFT"
 }

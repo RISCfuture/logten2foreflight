@@ -13,7 +13,7 @@ throwaway code I've ever written. Comments are sparse; obscurity abounds.
 
 ## Installation
 
-This script requires Swift 5.7 and Swift Package Manager. After checking out the
+This script requires Swift 6 and Swift Package Manager. After checking out the
 project, run `swift build` to install dependencies and create the executable.
 
 ## Usage
