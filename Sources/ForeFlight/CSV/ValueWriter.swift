@@ -1,7 +1,7 @@
 import Foundation
 
-fileprivate let zulu = TimeZone(secondsFromGMT: 0)!
-fileprivate let posix = Locale(identifier: "en_US_POSIX")
+fileprivate let zulu = TimeZone(secondsFromGMT: 0)!,
+                posix = Locale(identifier: "en_US_POSIX")
 
 class ValueWriter<Record> {
     private static var dateFormatter: DateFormatter {
@@ -30,7 +30,7 @@ class ValueWriter<Record> {
     
     func row(for record: Record) -> Array<String> {
         fields.map { field in
-            guard let field = field else { return "" }
+            guard let field else { return "" }
             return encode(value: record[keyPath: field])
         }
     }
@@ -43,7 +43,7 @@ class ValueWriter<Record> {
         if let value = value as? any RawRepresentable { return encode(value: value.rawValue) }
         if let value = value as? DateOnly { return Self.dateFormatter.string(from: value.date) }
         if let value = value as? TimeOnly { return Self.timeFormatter.string(from: value.date) }
-        if let value = value as? Entry.Approach {
+        if let value = value as? Flight.Approach {
             let vars: Array<Any> = [value.count as Any,
                                     value.type as Any,
                                     value.runway as Any,
@@ -51,7 +51,7 @@ class ValueWriter<Record> {
                                     value.comments as Any]
             return vars.map { encode(value: $0) }.joined(separator: ";")
         }
-        if let value = value as? Entry.Member {
+        if let value = value as? Flight.Member {
             let vars: Array<Any> = [value.person.name as Any,
                                     value.role as Any,
                                     value.person.email as Any]

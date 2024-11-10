@@ -1,7 +1,7 @@
 import Foundation
 
 package enum Error: Swift.Error {
-    case unknownLogTenValue(_ value: Any, field: String)
+    case unknownLogTenValue(_ value: Sendable, field: String)
     case missingLogTenValue(field: String)
 }
 

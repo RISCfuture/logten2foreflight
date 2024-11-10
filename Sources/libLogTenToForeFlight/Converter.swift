@@ -4,7 +4,7 @@ import ForeFlight
 
 public class Converter {
     let LTPLogbook: LogTen.Logbook
-    
+
     private static let dieselAircraft = ["DA42", "DA62"]
     private static let typeOverrides = [
         "2-33": "S233",
@@ -29,107 +29,116 @@ public class Converter {
         "SR22N-": "SR22",
         "SR22T-": "S22T"
     ]
-    
+
     public init(logbook: LogTen.Logbook) {
         LTPLogbook = logbook
     }
-    
-    public func convert() -> ForeFlight.Logbook {
-        var FFLogbook = ForeFlight.Logbook()
-        
-        for person in LTPLogbook.people.sorted(by: { $0.name < $1.name }) {
-            FFLogbook.people.append(convert(person: person))
+
+    public func convert() async -> ForeFlight.Logbook {
+        let FFLogbook = ForeFlight.Logbook()
+
+        for person in await LTPLogbook.people.sorted(by: { $0.name < $1.name }) {
+            await FFLogbook.add(person: convert(person: person))
         }
-        
-        for aircraft in LTPLogbook.aircraft.sorted(by: { $0.tailNumber < $1.tailNumber }) {
-            FFLogbook.aircraft.append(convert(aircraft: aircraft))
+
+        for aircraft in await LTPLogbook.aircraft.sorted(by: { $0.tailNumber < $1.tailNumber }) {
+            await FFLogbook.add(aircraft: convert(aircraft: aircraft))
         }
-        
-        for entry in LTPLogbook.entries.sorted(by: { $0.date < $1.date }) {
-            FFLogbook.entries.append(convert(entry: entry))
+
+        for entry in await LTPLogbook.flights.sorted(by: { $0.date < $1.date }) {
+            guard let converted = await convert(entry: entry) else { continue }
+            await FFLogbook.add(entry: converted)
         }
-        
+
         return FFLogbook
     }
-    
+
     private func convert(person: LogTen.Person) -> ForeFlight.Person {
         .init(name: person.name,
               email: person.email)
     }
-    
-    private func convert(aircraft: LogTen.Aircraft) -> ForeFlight.Aircraft {
-        .init(tailNumber: aircraft.tailNumber,
-              simulatorType: simulatorType(for: aircraft),
-              typeCode: typeCode(for: aircraft),
-              year: aircraft.year,
-              make: aircraft.make,
-              model: aircraft.model,
-              category: category(for: aircraft),
-              class: `class`(for: aircraft),
-              gearType: gearType(for: aircraft),
-              engineType: engineType(for: aircraft),
-              complex: aircraft.complex,
-              highPerformance: aircraft.highPerformance,
-              pressurized: aircraft.pressurized,
-              technicallyAdvanced: aircraft.technicallyAdvanced)
+
+    private func convert(aircraft: LogTen.Aircraft) async -> ForeFlight.Aircraft {
+        let type = await LTPLogbook.type(for: aircraft)
+
+        return .init(tailNumber: aircraft.tailNumber,
+                     simulatorType: simulatorType(for: type),
+                     typeCode: typeCode(for: type),
+                     year: aircraft.year,
+                     make: type.make,
+                     model: type.model,
+                     category: category(for: type),
+                     class: `class`(for: type),
+                     gearType: gearType(for: aircraft, type: type),
+                     engineType: engineType(for: aircraft, type: type),
+                     complex: aircraft.complex,
+                     highPerformance: aircraft.highPerformance,
+                     pressurized: aircraft.pressurized,
+                     technicallyAdvanced: aircraft.technicallyAdvanced)
     }
-    
-    private func convert(entry: LogTen.Entry) -> ForeFlight.Entry {
-        .init(date: entry.date,
-              aircraftID: entry.aircraft,
-              from: entry.from,
-              to: entry.to,
-              route: entry.route,
-              out: entry.out,
-              off: entry.off,
-              on: entry.on,
-              in: entry.in,
-              onDuty: entry.onDuty,
-              offDuty: entry.offDuty,
-              totalTime: entry.totalHours,
-              PICTime: entry.PICHours,
-              SICTime: entry.SICHours,
-              nightTime: entry.nightHours,
-              soloTime: entry.soloHours,
-              crossCountryTime: entry.crossCountryHours,
-              NVGTime: entry.NVGHours,
-              NVGOps: entry.takeoffsNVG + entry.landingsNVG,
-              distance: entry.distance,
-              takeoffsDay: entry.takeoffsDay,
-              landingsDayFullStop: entry.landingsDayFullStop,
-              takeoffsNight: entry.takeoffsNight,
-              landingsNightFullStop: entry.landingsNightFullStop,
-              landingsAll: entry.landingsAll,
-              actualInstrumentTime: entry.actualInstrumentHours,
-              simulatedInstrumentTime: entry.simulatedInstrumentHours,
-              hobbsStart: entry.hobbsStart,
-              hobbsEnd: entry.hobbsEnd,
-              tachStart: entry.tachStart,
-              tachEnd: entry.tachEnd,
-              holds: entry.holds,
-              approaches: approaches(for: entry),
-              dualGiven: entry.dualGivenHours,
-              dualReceived: entry.dualReceivedHours,
-              simulatorTime: entry.simulatorHours,
-              groundTime: entry.groundHours,
-              people: people(for: entry),
-              flightReview: entry.flightReview,
-              checkride: isCheckride(entry),
-              IPC: entry.IPC,
-              NVGProficiency: false,
-              recurrent: entry.proficiencyCheck,
-              remarks: entry.remarks)
+
+    private func convert(entry: LogTen.Flight) async -> ForeFlight.Flight? {
+        guard let aircraft = await LTPLogbook.aircraft(for: entry) else { return nil }
+        let from = await LTPLogbook.origin(for: entry),
+            to = await LTPLogbook.destination(for: entry),
+            approaches = await approaches(for: entry),
+            people = await people(for: entry)
+
+        return .init(date: entry.date,
+                     aircraftID: aircraft.tailNumber,
+                     from: from?.ICAO_or_LID,
+                     to: to?.ICAO_or_LID,
+                     route: entry.route,
+                     out: entry.out,
+                     off: entry.off,
+                     on: entry.on,
+                     in: entry.in,
+                     onDuty: entry.onDuty,
+                     offDuty: entry.offDuty,
+                     totalTime: entry.totalHours,
+                     PICTime: entry.PICHours,
+                     SICTime: entry.SICHours,
+                     nightTime: entry.nightHours,
+                     soloTime: entry.soloHours,
+                     crossCountryTime: entry.crossCountryHours,
+                     NVGTime: entry.NVGHours,
+                     NVGOps: entry.takeoffsNVG + entry.landingsNVG,
+                     distance: entry.distance,
+                     takeoffsDay: entry.takeoffsDay,
+                     landingsDayFullStop: entry.landingsDayFullStop,
+                     takeoffsNight: entry.takeoffsNight,
+                     landingsNightFullStop: entry.landingsNightFullStop,
+                     landingsAll: entry.landingsAll,
+                     actualInstrumentTime: entry.actualInstrumentHours,
+                     simulatedInstrumentTime: entry.simulatedInstrumentHours,
+                     hobbsStart: entry.hobbsStart,
+                     hobbsEnd: entry.hobbsEnd,
+                     tachStart: entry.tachStart,
+                     tachEnd: entry.tachEnd,
+                     holds: entry.holds,
+                     approaches: approaches,
+                     dualGiven: entry.dualGivenHours,
+                     dualReceived: entry.dualReceivedHours,
+                     simulatorTime: entry.simulatorHours,
+                     groundTime: entry.groundHours,
+                     people: people,
+                     flightReview: entry.flightReview,
+                     checkride: isCheckride(entry),
+                     IPC: entry.IPC,
+                     NVGProficiency: false,
+                     recurrent: entry.proficiencyCheck,
+                     remarks: entry.remarks)
     }
-    
-    private func typeCode(for aircraft: LogTen.Aircraft) -> String? {
+
+    private func typeCode(for type: LogTen.AircraftType) -> String? {
         for (`prefix`, FAAType) in Self.typeOverrides {
-            if aircraft.typeCode.hasPrefix(`prefix`) { return FAAType }
+            if type.typeCode.hasPrefix(`prefix`) { return FAAType }
         }
-        return aircraft.typeCode
+        return type.typeCode
     }
-    
-    private func simulatorType(for aircraft: LogTen.Aircraft) -> ForeFlight.Aircraft.SimulatorType {
-        switch aircraft.simulatorType {
+
+    private func simulatorType(for type: LogTen.AircraftType) -> ForeFlight.Aircraft.SimulatorType {
+        switch type.simulatorType {
             case .BATD: return .BATD
             case .AATD: return .AATD
             case .FTD: return .FTD
@@ -137,19 +146,19 @@ public class Converter {
             default: return .aircraft
         }
     }
-    
-    private func category(for aircraft: LogTen.Aircraft) -> ForeFlight.Aircraft.Category {
-        switch aircraft.category {
+
+    private func category(for type: LogTen.AircraftType) -> ForeFlight.Aircraft.Category {
+        switch type.category {
             case .airplane: return .airplane
             case .glider: return .glider
             case .simulator: return .simulator
         }
     }
-    
-    private func `class`(for aircraft: LogTen.Aircraft) -> ForeFlight.Aircraft.Class? {
-        switch aircraft.category {
+
+    private func `class`(for type: LogTen.AircraftType) -> ForeFlight.Aircraft.Class? {
+        switch type.category {
             case .airplane:
-                switch aircraft.class {
+                switch type.class {
                     case .airplaneSingleEngineLand: return .singleEngineLand
                     case .airplaneSingleEngineSea: return .singleEngineSea
                     case .airplaneMultiEngineLand: return .multiEngineLand
@@ -158,7 +167,7 @@ public class Converter {
                 }
             case .glider: return .glider
             case .simulator:
-                switch aircraft.simulatorType {
+                switch type.simulatorType {
                     case .BATD: return .ATD
                     case .AATD: return .ATD
                     case .FTD: return .FTD
@@ -167,13 +176,13 @@ public class Converter {
                 }
         }
     }
-    
-    private func gearType(for aircraft: LogTen.Aircraft) -> ForeFlight.Aircraft.GearType? {
-        switch aircraft.simulatorType {
+
+    private func gearType(for aircraft: LogTen.Aircraft, type: LogTen.AircraftType) -> ForeFlight.Aircraft.GearType? {
+        switch type.simulatorType {
             case .BATD, .AATD: return nil
             default: break
         }
-        
+
         if aircraft.amphibious { return .amphibian }
         if aircraft.floats { return .floats }
         if aircraft.skids { return .skids }
@@ -186,30 +195,35 @@ public class Converter {
             else { return .fixedTricycle }
         }
     }
-    
-    private func engineType(for aircraft: LogTen.Aircraft) -> ForeFlight.Aircraft.EngineType? {
-        switch aircraft.engineType {
+
+    private func engineType(for aircraft: LogTen.Aircraft, type: LogTen.AircraftType) -> ForeFlight.Aircraft.EngineType? {
+        switch type.engineType {
             case .piston:
                 if aircraft.radial { return .radial }
-                if Self.dieselAircraft.contains(aircraft.model) { return .diesel }
+                if Self.dieselAircraft.contains(type.model) { return .diesel }
                 else { return .piston }
             case .nonpowered: return .nonpowered
             case .turbofan: return .turbofan
             case .none: return nil
         }
     }
-    
-    private func approaches(for entry: LogTen.Entry) -> Array<ForeFlight.Entry.Approach> {
-        entry.approaches.compactMap {
-            guard let type = approachType(for: $0) else { return nil }
-            return ForeFlight.Entry.Approach(count: $0.count,
-                                             type: type,
-                                             runway: $0.runway,
-                                             airport: $0.airport)
+
+    private func approaches(for entry: LogTen.Flight) async -> Array<ForeFlight.Flight.Approach> {
+        let flightApproaches = await LTPLogbook.approaches(for: entry)
+        var approaches = Array<ForeFlight.Flight.Approach>()
+        for approach in flightApproaches {
+            guard let type = approachType(for: approach),
+                  let place = await LTPLogbook.place(for: approach),
+                  let count = approach.count else { continue }
+            approaches.append(.init(count: count,
+                                    type: type,
+                                    runway: approach.runway,
+                                    airport: place.ICAO_or_LID))
         }
+        return approaches
     }
-    
-    private func approachType(for approach: LogTen.Entry.Approach) -> ForeFlight.Entry.ApproachType? {
+
+    private func approachType(for approach: LogTen.Approach) -> ForeFlight.Flight.ApproachType? {
         switch approach.type {
             case .GCA: return .GCA
             case .GLS: return .GLS
@@ -243,32 +257,51 @@ public class Converter {
             case .visual: return nil
             case .VOR: return .VOR
             case .VOR_DME: return .VOR
+            case .none: return nil
         }
     }
-    
-    private func people(for entry: LogTen.Entry) -> Array<ForeFlight.Entry.Member> {
-        var people = Array<ForeFlight.Entry.Member>()
-        
-        if let instructor = entry.instructor { people.append(convert(person: instructor, role: .instructor)) }
-        if let student = entry.student { people.append(convert(person: student, role: .student)) }
-        if let safetyPilot = entry.safetyPilot { people.append(convert(person: safetyPilot, role: .safetyPilot)) }
-        if let examiner = entry.examiner { people.append(convert(person: examiner, role: .examiner)) }
-        if let PIC = entry.PIC { people.append(convert(person: PIC, role: .PIC)) }
-        if let SIC = entry.SIC { people.append(convert(person: SIC, role: .SIC)) }
-        
-        for passenger in entry.passengers {
+
+    private func people(for entry: LogTen.Flight) async -> Array<ForeFlight.Flight.Member> {
+        var people = Array<ForeFlight.Flight.Member>()
+
+        if let safetyPilot = await LTPLogbook.safetyPilot(for: entry) {
+            people.append(convert(person: safetyPilot, role: .safetyPilot))
+        }
+        if let examiner = await LTPLogbook.examiner(for: entry) {
+            people.append(convert(person: examiner, role: .examiner))
+        }
+        if let instructor = await LTPLogbook.instructor(for: entry) {
+            people.append(convert(person: instructor, role: .instructor))
+        }
+        if let student = await LTPLogbook.student(for: entry) {
+            people.append(convert(person: student, role: .student))
+        }
+        if let PIC = await LTPLogbook.PIC(for: entry) {
+            let instructor = await LTPLogbook.instructor(for: entry)
+            if !PIC.isMe && PIC != instructor {
+                people.append(convert(person: PIC, role: .PIC))
+            }
+        }
+        if let SIC = await LTPLogbook.SIC(for: entry) {
+            let safetyPilot = await LTPLogbook.safetyPilot(for: entry)
+            if SIC != safetyPilot {
+                people.append(convert(person: SIC, role: .SIC))
+            }
+        }
+
+        for passenger in await LTPLogbook.passengers(for: entry) {
             people.append(convert(person: passenger, role: .passenger))
         }
-        
+
         return people
     }
-    
-    private func convert(person: LogTen.Person, role: ForeFlight.Entry.Role) -> ForeFlight.Entry.Member {
+
+    private func convert(person: LogTen.Person, role: ForeFlight.Flight.Role) -> ForeFlight.Flight.Member {
         .init(person: .init(name: person.name, email: person.email),
               role: role)
     }
-    
-    private func isCheckride(_ entry: LogTen.Entry) -> Bool {
+
+    private func isCheckride(_ entry: LogTen.Flight) -> Bool {
         entry.flightReview && entry.remarks?.localizedCaseInsensitiveContains("checkride") ?? false
     }
 }

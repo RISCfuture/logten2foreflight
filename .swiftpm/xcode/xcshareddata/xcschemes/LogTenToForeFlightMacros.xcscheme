@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "libLogTenToForeFlight"
-               BuildableName = "libLogTenToForeFlight"
-               BlueprintName = "libLogTenToForeFlight"
+               BlueprintIdentifier = "LogTenToForeFlightMacros"
+               BuildableName = "LogTenToForeFlightMacros"
+               BlueprintName = "LogTenToForeFlightMacros"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -50,9 +50,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "libLogTenToForeFlight"
-            BuildableName = "libLogTenToForeFlight"
-            BlueprintName = "libLogTenToForeFlight"
+            BlueprintIdentifier = "LogTenToForeFlightMacros"
+            BuildableName = "LogTenToForeFlightMacros"
+            BlueprintName = "LogTenToForeFlightMacros"
             ReferencedContainer = "container:">
          </BuildableReference>
       </MacroExpansion>

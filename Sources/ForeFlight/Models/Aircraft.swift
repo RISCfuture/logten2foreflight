@@ -15,38 +15,40 @@ package struct Aircraft {
     package private(set) var highPerformance: Bool
     package private(set) var pressurized: Bool
     package private(set) var technicallyAdvanced: Bool
-    
-    static let fieldMapping: Dictionary<String, PartialKeyPath<Self>> = [
-        "AircraftID": \.tailNumber,
-        "EquipmentType": \.simulatorType,
-        "TypeCode": \.typeCode,
-        "Year": \.year,
-        "Make": \.make,
-        "Model": \.model,
-        "Category": \.category,
-        "Class": \.class,
-        "GearType": \.gearType,
-        "EngineType": \.engineType,
-        "Complex": \.complex,
-        "HighPerformance": \.highPerformance,
-        "Pressurized": \.pressurized,
-        "TAA": \.technicallyAdvanced
-    ]
-    
+
+    static var fieldMapping: Dictionary<String, PartialKeyPath<Self>> {
+        [
+            "AircraftID": \.tailNumber,
+            "EquipmentType": \.simulatorType,
+            "TypeCode": \.typeCode,
+            "Year": \.year,
+            "Make": \.make,
+            "Model": \.model,
+            "Category": \.category,
+            "Class": \.class,
+            "GearType": \.gearType,
+            "EngineType": \.engineType,
+            "Complex": \.complex,
+            "HighPerformance": \.highPerformance,
+            "Pressurized": \.pressurized,
+            "TAA": \.technicallyAdvanced
+        ]
+    }
+
     package init(tailNumber: String,
-                simulatorType: SimulatorType,
-                typeCode: String?,
-                year: UInt? = nil,
-                make: String,
-                model: String,
-                category: Category,
-                class: Class? = nil,
-                gearType: GearType? = nil,
-                engineType: EngineType? = nil,
-                complex: Bool = false,
-                highPerformance: Bool = false,
-                pressurized: Bool = false,
-                technicallyAdvanced: Bool = false) {
+                 simulatorType: SimulatorType,
+                 typeCode: String?,
+                 year: UInt? = nil,
+                 make: String,
+                 model: String,
+                 category: Category,
+                 class: Class? = nil,
+                 gearType: GearType? = nil,
+                 engineType: EngineType? = nil,
+                 complex: Bool = false,
+                 highPerformance: Bool = false,
+                 pressurized: Bool = false,
+                 technicallyAdvanced: Bool = false) {
         self.tailNumber = tailNumber
         self.simulatorType = simulatorType
         self.typeCode = typeCode
@@ -62,8 +64,8 @@ package struct Aircraft {
         self.pressurized = pressurized
         self.technicallyAdvanced = technicallyAdvanced
     }
-    
-    
+
+
     package enum GearType: String {
         case amphibian = "AM"
         case floats = "FL"
@@ -74,7 +76,7 @@ package struct Aircraft {
         case retractableConventional = "RC"
         case retractableTricycle = "RT"
     }
-    
+
     package enum EngineType: String {
         case piston = "Piston"
         case turbofan = "Turbofan"
@@ -82,7 +84,7 @@ package struct Aircraft {
         case diesel = "Diesel"
         case nonpowered = "Non-Powered"
     }
-    
+
     package enum SimulatorType: String {
         case aircraft
         case FFS = "ffs"
@@ -90,7 +92,7 @@ package struct Aircraft {
         case AATD = "aatd"
         case BATD = "batd"
     }
-    
+
     package enum Category: String {
         case airplane = "Airplane"
         case rotorcraft = "Rotorcraft"
@@ -101,7 +103,7 @@ package struct Aircraft {
         case weightShiftControl = "Weight-Shift-Control"
         case simulator = "Simulator"
     }
-    
+
     package enum Class: String {
         case singleEngineLand = "ASEL"
         case multiEngineLand = "AMEL"
