@@ -301,5 +301,9 @@ package struct Flight {
         case safetyPilot = "Safety Pilot"
         case examiner = "Examiner"
         case passenger = "Passenger"
+        case flightAttendant = "Flight Attendant"
+        case flightEngineer = "Flight Engineer"
+        case firstOfficer = "First Officer"
+        case secondOfficer = "Second Officer"
     }
 }

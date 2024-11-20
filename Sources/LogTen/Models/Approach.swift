@@ -1,29 +1,26 @@
-import Foundation
-@preconcurrency import GRDB
-import LogTenToForeFlightMacros
-
-@QueryObject
-package struct Approach: Model, Identifiable, Equatable, Hashable {
-
-    // MARK: Columns
-
-    @QueryField(column: "Z_PK")
-    package let id: Int64
-    @QueryField(column: "ZAPPROACH_PLACE")
-    package let placeID: Int64?
-    @QueryField(column: "ZAPPROACH_TYPE", convert: { ApproachType(from: $0) })
+package struct Approach: Record {
+    
+    // MARK: Properties
+    
+    package let place: Place?
     package let type: ApproachType?
-    @QueryField(column: "ZAPPROACH_COMMENT")
     package let runway: String?
-    @QueryField(column: "ZAPPROACH_QUANTITY")
     package let count: UInt?
-
-    // MARK: Database configuration
-
-    static package let databaseTableName = "ZAPPROACH"
-
-    // MARK: Enumerations
-
+    
+    // MARK: Initializers
+    
+    init(approach: CNApproach) {
+        place = .init(place: approach.approach_place)
+        type = {
+            guard let type = approach.approach_type else { return nil }
+            return .init(rawValue: type)
+        }()
+        runway = approach.approach_comment
+        count = approach.approach_quantity?.uintValue
+    }
+    
+    // MARK: Enums
+    
     package enum ApproachType: String, RecordEnum {
         case GCA
         case GLS

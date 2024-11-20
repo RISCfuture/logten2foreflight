@@ -1,21 +1,20 @@
-import Foundation
-@preconcurrency import GRDB
-import LogTenToForeFlightMacros
-
-@QueryObject
-package struct Place: Model, Identifiable, Equatable, Hashable {
-
-    // MARK: Columns
-
-    @QueryField(column: "Z_PK") package let id: Int64
-    @QueryField(column: "ZPLACE_IDENTIFIER") package let identifier: String
-    @QueryField(column: "ZPLACE_ICAOID") package let ICAO_ID: String?
-
+package struct Place: IdentifiableRecord {
+    
+    // MARK: Properties
+    
+    package let identifier: String
+    package var id: String { identifier }
+    package let ICAO: String?
+    
     // MARK: Computed properties
-
-    package var ICAO_or_LID: String { ICAO_ID ?? identifier }
-
-    // MARK: Database configuration
-
-    static package let databaseTableName = "ZPLACE"
+    
+    package var ICAO_or_LID: String { ICAO ?? identifier }
+    
+    // MARK: Initializers
+    
+    init?(place: CNPlace?) {
+        guard let place else { return nil }
+        identifier = place.place_identifier
+        ICAO = place.place_icaoid
+    }
 }

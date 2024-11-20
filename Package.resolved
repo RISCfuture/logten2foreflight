@@ -1,5 +1,5 @@
 {
-  "originHash" : "1553f41d12658873e3f0c079c1194d3245402bb3f5fe31849e02d7575c9346ad",
+  "originHash" : "5c5b33ecc908208ae4be1e56be9ba9c70c9e3e2258f137cc625243484fe92f80",
   "pins" : [
     {
       "identity" : "codablecsv",
@@ -8,15 +8,6 @@
       "state" : {
         "revision" : "99ace2cfdfbc19108b529c021005fb57a460e715",
         "version" : "0.6.7"
-      }
-    },
-    {
-      "identity" : "grdb.swift",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/groue/GRDB.swift.git",
-      "state" : {
-        "revision" : "2cf6c756e1e5ef6901ebae16576a7e4e4b834622",
-        "version" : "6.29.3"
       }
     },
     {
@@ -35,24 +26,6 @@
       "state" : {
         "revision" : "9cb486020ebf03bfa5b5df985387a14a98744537",
         "version" : "1.6.1"
-      }
-    },
-    {
-      "identity" : "swift-macro-toolkit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/stackotter/swift-macro-toolkit.git",
-      "state" : {
-        "branch" : "main",
-        "revision" : "fe6653d8e85d398c831b252ac9e0124304dc8782"
-      }
-    },
-    {
-      "identity" : "swift-syntax",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/swiftlang/swift-syntax.git",
-      "state" : {
-        "revision" : "0687f71944021d616d34d922343dcef086855920",
-        "version" : "600.0.1"
       }
     }
   ],

@@ -1,130 +1,107 @@
 import Foundation
-@preconcurrency import GRDB
-import LogTenToForeFlightMacros
 
-@QueryObject
-package struct Flight: Model, Identifiable, Hashable, Equatable {
-
-    // MARK: Columns
-
-    @QueryField(column: "Z_PK") package let id: Int64
-    @QueryField(column: "ZFLIGHT_AIRCRAFT") package let aircraftID: Int64?
-
-    @QueryField(column: "ZFLIGHT_FLIGHTDATE", convert: { Self.parseDate($0)! })
+package struct Flight: Record {
+    
+    // MARK: Properties
+    
+    package let aircraft: Aircraft?
+    
+    package let approaches: Array<Approach>
+    
+    package let PIC: Person?
+    package let SIC: Person?
+    package let instructor: Person?
+    package let student: Person?
+    package let safetyPilot: Person?
+    package let examiner: Person?
+    package let flightEngineer: Person?
+    package let flightAttendants: Array<Person>
+    package let passengers: Array<Person>
+    
     package let date: Date
-    @QueryField(column: "ZFLIGHT_ACTUALDEPARTURETIME", convert: { Self.parseDate($0) })
     package let out: Date?
-    @QueryField(column: "ZFLIGHT_TAKEOFFTIME", convert: { Self.parseDate($0) })
     package let off: Date?
-    @QueryField(column: "ZFLIGHT_LANDINGTIME", convert: { Self.parseDate($0) })
     package let on: Date?
-    @QueryField(column: "ZFLIGHT_ACTUALARRIVALTIME", convert: { Self.parseDate($0) })
     package let `in`: Date?
-    @QueryField(column: "ZFLIGHT_ONDUTYTIME", convert: { Self.parseDate($0) })
     package let onDuty: Date?
-    @QueryField(column: "ZFLIGHT_OFFDUTYTIME", convert: { Self.parseDate($0) })
     package let offDuty: Date?
-    @QueryField(column: "ZFLIGHT_HOBBSSTART") package let hobbsStart: Double?
-    @QueryField(column: "ZFLIGHT_HOBBSSTOP") package let hobbsEnd: Double?
-    @QueryField(column: "ZFLIGHT_TACHSTART") package let tachStart: Double?
-    @QueryField(column: "ZFLIGHT_TACHSTOP") package let tachEnd: Double?
-
-    @QueryField(column: "ZFLIGHT_FROMPLACE") package let originID: Int64?
-    @QueryField(column: "ZFLIGHT_TOPLACE") package let destinationID: Int64?
-    @QueryField(column: "ZFLIGHT_ROUTE") package let route: String?
-    @QueryField(column: "ZFLIGHT_DISTANCE") package let distance: Double?
-
-    @QueryField(column: "ZFLIGHT_TOTALTIME", convert: { UInt($0 ?? 0) })
+    package let hobbsStart: Double?
+    package let hobbsEnd: Double?
+    package let tachStart: Double?
+    package let tachEnd: Double?
+    
+    package let from: Place?
+    package let to: Place?
+    package let route: String?
+    package let distance: Double?
+    
     package let totalTime: UInt // minutes
-    @QueryField(column: "ZFLIGHT_PIC", convert: { UInt($0 ?? 0) })
     package let PICTime: UInt // minutes
-    @QueryField(column: "ZFLIGHT_SIC", convert: { UInt($0 ?? 0) })
     package let SICTime: UInt // minutes
-    @QueryField(column: "ZFLIGHT_SOLO", convert: { UInt($0 ?? 0) })
     package let soloTime: UInt // minutes
-    @QueryField(column: "ZFLIGHT_NIGHT", convert: { UInt($0 ?? 0) })
     package let nightTime: UInt // minutes
-    @QueryField(column: "ZFLIGHT_CROSSCOUNTRY", convert: { UInt($0 ?? 0) })
     package let crossCountryTime: UInt // minutes
-    @QueryField(column: "ZFLIGHT_DUALGIVEN", convert: { UInt($0 ?? 0) })
     package let dualGivenTime: UInt // minutes
-    @QueryField(column: "ZFLIGHT_DUALRECEIVED", convert: { UInt($0 ?? 0) })
     package let dualReceivedTime: UInt // minutes
-    @QueryField(column: "ZFLIGHT_ACTUALINSTRUMENT", convert: { UInt($0 ?? 0) })
     package let actualInstrumentTime: UInt // minutes
-    @QueryField(column: "ZFLIGHT_SIMULATEDINSTRUMENT", convert: { UInt($0 ?? 0) })
     package let simulatedInstrumentTime: UInt // minutes
-    @QueryField(column: "ZFLIGHT_SIMULATOR", convert: { UInt($0 ?? 0) })
     package let simulatorTime: UInt // minutes
-    @QueryField(column: "ZFLIGHT_GROUND", convert: { UInt($0 ?? 0) })
     package let groundTime: UInt // minutes
-    @QueryField(column: "ZFLIGHT_NIGHTVISIONGOGGLE", convert: { UInt($0 ?? 0) })
     package let NVGTime: UInt // minutes
-
-    @QueryField(column: "ZFLIGHT_DAYTAKEOFFS", convert: { UInt($0 ?? 0) })
+    
     package let takeoffsDay: UInt
-    @QueryField(column: "ZFLIGHT_NIGHTTAKEOFFS", convert: { UInt($0 ?? 0) })
     package let takeoffsNight: UInt
-    @QueryField(column: "ZFLIGHT_DAYLANDINGS", convert: { UInt($0 ?? 0) })
     package let landingsDay: UInt
-    @QueryField(column: "ZFLIGHT_NIGHTLANDINGS", convert: { UInt($0 ?? 0) })
     package let landingsNight: UInt
-    @QueryField(column: "ZFLIGHT_FULLSTOPS", convert: { UInt($0 ?? 0) })
     package let landingsFullStop: UInt
-    @QueryField(column: "ZFLIGHT_CUSTOMLANDING1", convert: { UInt($0 ?? 0) })
     package let landingsNightFullStop: UInt
-    @QueryField(column: "ZFLIGHT_NIGHTVISIONGOGGLETAKEOFFS", convert: { UInt($0 ?? 0) })
     package let takeoffsNVG: UInt
-    @QueryField(column: "ZFLIGHT_NIGHTVISIONGOGGLELANDINGS", convert: { UInt($0 ?? 0) })
     package let landingsNVG: UInt
-
-    @QueryField(column: "ZFLIGHT_HOLDS", convert: { UInt($0 ?? 0) })
+    
     package let holds: UInt
-
-    @QueryField(column: "ZFLIGHT_REVIEW", convert: { $0 ?? false })
+    
     package let flightReview: Bool
-    @QueryField(column: "ZFLIGHT_INSTRUMENTPROFICIENCYCHECK", convert: { $0 ?? false })
     package let IPC: Bool
-    @QueryField(column: "ZFLIGHT_CUSTOMNOTE1", convert: { $0 ?? false })
     package let proficiencyCheck: Bool
-
-    @QueryField(column: "ZFLIGHT_REMARKS") package let remarks: String?
-
-    // MARK: Computed properties
-
+    package let checkride: Bool
+    
+    package let remarks: String?
+    
+    // MARK: Computed Properties
+    
     package var landingsAll: UInt { landingsDay + landingsNight }
     package var landingsDayFullStop: UInt { landingsFullStop - landingsNightFullStop }
-
+    
     package var dutyTime: TimeInterval? {
         guard let onDuty, let offDuty else { return nil }
         return offDuty.timeIntervalSince(onDuty)
     }
-
+    
     package var dutyHours: Double? {
         guard let dutyTime else { return nil }
         return dutyTime / 3600
     }
-
+    
     package var blockTime: TimeInterval? {
         guard let out, let `in` else { return nil }
         return `in`.timeIntervalSince(out)
     }
-
+    
     package var blockHours: Double? {
         guard let blockTime else { return nil }
         return blockTime / 3600
     }
-
+    
     package var flightTime: TimeInterval? {
         guard let off, let on else { return nil }
         return on.timeIntervalSince(off)
     }
-
+    
     package var flightHours: Double? {
         guard let flightTime else { return nil }
         return flightTime / 3600
     }
-
+    
     package var totalHours: Double { Double(totalTime)/60 }
     package var PICHours: Double { Double(PICTime)/60 }
     package var SICHours: Double { Double(SICTime)/60 }
@@ -138,8 +115,78 @@ package struct Flight: Model, Identifiable, Hashable, Equatable {
     package var simulatorHours: Double { Double(simulatorTime)/60 }
     package var groundHours: Double { Double(groundTime)/60 }
     package var NVGHours: Double { Double(NVGTime)/60 }
-
-    // MARK: Database config
-
-    static package let databaseTableName = "ZFLIGHT"
+    
+    // MARK: Initializers
+    
+    init(flight: CNFlight,
+         aircraft: Aircraft,
+         nightFullStopProperty: KeyPath<CNFlight, NSNumber?>,
+         proficiencyProperty: KeyPath<CNFlight, String?>,
+         checkrideProperty: KeyPath<CNFlight, String?>,
+         safetyPilotProperty: KeyPath<CNFlightCrew, CNPerson?>,
+         examinerProperty: KeyPath<CNFlightCrew, CNPerson?>
+    ) {
+        self.aircraft = aircraft
+        approaches = (flight.flight_flightApproaches?.approaches ?? [])
+            .map { .init(approach: $0) }
+        PIC = .init(person: flight.flight_flightCrew?.flightCrew_PIC)
+        SIC = .init(person: flight.flight_flightCrew?.flightCrew_SIC)
+        instructor = .init(person: flight.flight_flightCrew?.flightCrew_instructor)
+        student = .init(person: flight.flight_flightCrew?.flightCrew_student)
+        safetyPilot = .init(person: flight.flight_flightCrew?[keyPath: safetyPilotProperty])
+        examiner = .init(person: flight.flight_flightCrew?[keyPath: examinerProperty])
+        flightEngineer = .init(person: flight.flight_flightCrew?.flightCrew_flightEngineer)
+        flightAttendants = (flight.flight_flightCrew?.flightAttendants ?? []).compactMap { .init(person: $0) }
+        passengers = (flight.flight_flightPassengers?.passengers ?? [])
+            .compactMap { .init(person: $0) }
+        
+        date = flight.flight_flightDate
+        out = flight.flight_actualDepartureTime
+        off = flight.flight_takeoffTime
+        on = flight.flight_landingTime
+        `in` = flight.flight_actualArrivalTime
+        onDuty = flight.flight_onDutyTime
+        offDuty = flight.flight_offDutyTime
+        hobbsStart = flight.flight_hobbsStart?.doubleValue
+        hobbsEnd = flight.flight_hobbsStop?.doubleValue
+        tachStart = flight.flight_tachStart?.doubleValue
+        tachEnd = flight.flight_tachStop?.doubleValue
+        
+        from = .init(place: flight.flight_fromPlace)
+        to = .init(place: flight.flight_toPlace)
+        route = flight.flight_route
+        distance = flight.flight_distance?.doubleValue
+        
+        totalTime = flight.flight_totalTime?.uintValue ?? 0
+        PICTime = flight.flight_pic?.uintValue ?? 0
+        SICTime = flight.flight_sic?.uintValue ?? 0
+        soloTime = flight.flight_solo?.uintValue ?? 0
+        nightTime = flight.flight_night?.uintValue ?? 0
+        crossCountryTime = flight.flight_crossCountry?.uintValue ?? 0
+        dualGivenTime = flight.flight_dualGiven?.uintValue ?? 0
+        dualReceivedTime = flight.flight_dualReceived?.uintValue ?? 0
+        actualInstrumentTime = flight.flight_actualInstrument?.uintValue ?? 0
+        simulatedInstrumentTime = flight.flight_simulatedInstrument?.uintValue ?? 0
+        simulatorTime = flight.flight_simulator?.uintValue ?? 0
+        groundTime = flight.flight_ground?.uintValue ?? 0
+        NVGTime = flight.flight_nightVisionGoggle?.uintValue ?? 0
+        
+        takeoffsDay = flight.flight_dayTakeoffs?.uintValue ?? 0
+        takeoffsNight = flight.flight_nightTakeoffs?.uintValue ?? 0
+        landingsDay = flight.flight_dayLandings?.uintValue ?? 0
+        landingsNight = flight.flight_nightLandings?.uintValue ?? 0
+        landingsFullStop = flight.flight_fullStops?.uintValue ?? 0
+        landingsNightFullStop = flight[keyPath: nightFullStopProperty]?.uintValue ?? 0
+        takeoffsNVG = flight.flight_nightVisionGoggleTakeoffs?.uintValue ?? 0
+        landingsNVG = flight.flight_nightVisionGoggleLandings?.uintValue ?? 0
+        
+        holds = flight.flight_holds?.uintValue ?? 0
+        
+        flightReview = flight.flight_review?.boolValue ?? false
+        IPC = flight.flight_instrumentProficiencyCheck?.boolValue ?? false
+        proficiencyCheck = flight[keyPath: proficiencyProperty]?.isPresent ?? false
+        checkride = flight[keyPath: checkrideProperty]?.isPresent ?? false
+        
+        remarks = flight.flight_remarks
+    }
 }

@@ -1,18 +1,21 @@
 import Foundation
-@preconcurrency import GRDB
-import LogTenToForeFlightMacros
 
-@QueryObject
-package struct Person: Model, Identifiable, Equatable, Hashable {
+package struct Person: IdentifiableRecord {
     
-    // MARK: Columns
+    // MARK: Properties
     
-    @QueryField(column: "Z_PK") package let id: Int64
-    @QueryField(column: "ZPERSON_NAME") package let name: String
-    @QueryField(column: "ZPERSON_EMAIL") package let email: String?
-    @QueryField(column: "ZPERSON_ISME") package let isMe: Bool
-
-    // MARK: Database configuration
+    package let id: URL
+    package let name: String
+    package let email: String?
+    package let isMe: Bool
     
-    static package let databaseTableName = "ZPERSON"
+    // MARK: Initializers
+    
+    init?(person: CNPerson?) {
+        guard let person else { return nil }
+        id = person.objectID.uriRepresentation()
+        name = person.person_name
+        email = person.person_email
+        isMe = person.person_isMe?.boolValue ?? false
+    }
 }

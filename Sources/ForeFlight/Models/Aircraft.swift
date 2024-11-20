@@ -78,11 +78,15 @@ package struct Aircraft {
     }
 
     package enum EngineType: String {
-        case piston = "Piston"
-        case turbofan = "Turbofan"
-        case radial = "Radial"
         case diesel = "Diesel"
+        case electric = "Electric"
         case nonpowered = "Non-Powered"
+        case piston = "Piston"
+        case radial = "Radial"
+        case turbofan = "Turbofan"
+        case turbojet = "Turbojet"
+        case turboprop = "Turboprop"
+        case turboshaft = "Turboshaft"
     }
 
     package enum SimulatorType: String {
@@ -113,7 +117,7 @@ package struct Aircraft {
         case gyroplane = "RG"
         case glider = "Glider"
         case airship = "LA"
-        case balloon = "LB"
+        case freeBalloon = "LB"
         case poweredLift = "Powered Lift"
         case poweredParachuteLand = "PL"
         case poweredParachuteSea = "PS"
