@@ -19,17 +19,17 @@ struct LogtenToForeFlight: AsyncParsableCommand {
     
     @Option(help: "The LogTenCoreDataStore.sql file containing the logbook entries.",
             completion: .file(extensions: ["sql"]),
-            transform: URL.init(fileURLWithPath:))
+            transform: { URL(filePath: $0, directoryHint: .notDirectory) })
     var logtenFile = Self.logtenDataStoreURL
     
     @Option(help: "The location of the LogTen Pro managed object model file.",
             completion: .file(extensions: ["momd"]),
-            transform: URL.init(fileURLWithPath:))
+            transform: { URL(filePath: $0, directoryHint: .isDirectory) })
     var logtenManagedObjectModel = Self.managedObjectModelURL
     
     @Argument(help: "The ForeFlight logbook.csv file to create.",
               completion: .file(extensions: ["csv"]),
-              transform: URL.init(fileURLWithPath:))
+              transform: { URL(filePath: $0, directoryHint: .notDirectory) })
     var foreflightFile: URL
     
     @Flag(help: "Include extra information in the output.")

@@ -21,7 +21,7 @@ extension Error: LocalizedError {
             case let .missingLogTenValue(field):
                 return "Missing value for \(field)"
             case let .couldntCreateStore(path):
-                return "Couldn’t create Core Data store for “\(path.absoluteString)”"
+                return "Couldn’t create Core Data store for “\(path.lastPathComponent)”"
             case let .missingProperty(property, model):
                 return "\(model) must have a property named “\(property)”"
             case let .unsupportedCategory(category):
