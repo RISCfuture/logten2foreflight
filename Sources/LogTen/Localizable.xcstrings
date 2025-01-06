@@ -1,0 +1,44 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "“%@” is not a valid aircraft class for category “%@”" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "“%1$@” is not a valid aircraft class for category “%2$@”"
+          }
+        }
+      }
+    },
+    "%@ must have a property named “%@”" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ must have a property named “%2$@”"
+          }
+        }
+      }
+    },
+    "Couldn’t create Core Data store for “%@”" : {
+
+    },
+    "LogTen Pro aircraft category “%@” is not supported by ForeFlight" : {
+
+    },
+    "LogTen Pro aircraft class “%@” is not supported by ForeFlight" : {
+
+    },
+    "LogTen Pro engine type “%@” is not supported by ForeFlight" : {
+
+    },
+    "Missing aircraft class for aircraft type “%@”" : {
+
+    },
+    "Missing Sim Type for aircraft type “%@”" : {
+
+    }
+  },
+  "version" : "1.0"
+}

@@ -1,8 +1,6 @@
 import Foundation
 
 package enum Error: Swift.Error {
-    case unknownLogTenValue(_ value: Sendable, field: String)
-    case missingLogTenValue(field: String)
     case couldntCreateStore(path: URL)
     case missingProperty(_ property: String, model: String)
     case unsupportedCategory(_ category: AircraftType.Category)
@@ -16,26 +14,22 @@ package enum Error: Swift.Error {
 extension Error: LocalizedError {
     package var errorDescription: String? {
         switch self {
-            case let .unknownLogTenValue(value, field):
-                return "Unknown value ‘\(value)’ for \(field)"
-            case let .missingLogTenValue(field):
-                return "Missing value for \(field)"
             case let .couldntCreateStore(path):
-                return "Couldn’t create Core Data store for “\(path.lastPathComponent)”"
+                return String(localized: "Couldn’t create Core Data store for “\(path.lastPathComponent)”")
             case let .missingProperty(property, model):
-                return "\(model) must have a property named “\(property)”"
+                return String(localized: "\(model) must have a property named “\(property)”")
             case let .unsupportedCategory(category):
-                return "LogTen Pro aircraft category “\(category)” is not supported by ForeFlight"
+                return String(localized: "LogTen Pro aircraft category “\(category.rawValue)” is not supported by ForeFlight")
             case let .unsupportedClass(`class`):
-                return "LogTen Pro aircraft class “\(`class`)” is not supported by ForeFlight"
+                return String(localized: "LogTen Pro aircraft class “\(`class`.rawValue)” is not supported by ForeFlight")
             case let .unsupportedEngineType(type):
-                return "LogTen Pro engine type “\(type)” is not supported by ForeFlight"
+                return String(localized: "LogTen Pro engine type “\(type.rawValue)” is not supported by ForeFlight")
             case let .invalidClass(`class`, category):
-                return "“\(`class`)” is not a valid aircraft class for category “\(category)”"
+                return String(localized: "“\(`class`.rawValue)” is not a valid aircraft class for category “\(category.rawValue)”")
             case let .missingClass(type):
-                return "Missing aircraft class for aircraft type “\(type)”"
+                return String(localized: "Missing aircraft class for aircraft type “\(type)”")
             case let .missingSimulatorType(type):
-                return "Missing Sim Type for aircraft type “\(type)”"
+                return String(localized: "Missing Sim Type for aircraft type “\(type)”")
         }
     }
 }
