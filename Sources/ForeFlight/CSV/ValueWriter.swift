@@ -9,55 +9,55 @@ class ValueWriter<Record> {
         formatter.locale = posix
         formatter.timeZone = zulu
         formatter.dateFormat = "yyyy-MM-dd"
-        
+
         return formatter
     }
-    
+
     private static var timeFormatter: DateFormatter {
         let formatter = DateFormatter()
         formatter.locale = posix
         formatter.timeZone = zulu
         formatter.dateFormat = "HHmm"
-        
+
         return formatter
     }
-    
+
     private let fields: Array<PartialKeyPath<Record>?>
-    
+
     init(fields: Array<PartialKeyPath<Record>?>) {
         self.fields = fields
     }
-    
+
     func row(for record: Record) -> Array<String> {
         fields.map { field in
             guard let field else { return "" }
             return encode(value: record[keyPath: field])
         }
     }
-    
+
     func encode(value: Any) -> String {
-        if let value = value as? String { return value }
-        if let value = value as? any BinaryInteger { return String(value) }
-        if let value = value as? any BinaryFloatingPoint { return String(format: "%0.1f", value as! CVarArg) }
-        if let value = value as? Bool { return value ? "x" : "" }
-        if let value = value as? any RawRepresentable { return encode(value: value.rawValue) }
-        if let value = value as? DateOnly { return Self.dateFormatter.string(from: value.date) }
-        if let value = value as? TimeOnly { return Self.timeFormatter.string(from: value.date) }
-        if let value = value as? Flight.Approach {
-            let vars: Array<Any> = [value.count as Any,
-                                    value.type as Any,
-                                    value.runway as Any,
-                                    value.airport as Any,
-                                    value.comments as Any]
-            return vars.map { encode(value: $0) }.joined(separator: ";")
+        return switch value {
+            case let value as String: value
+            case let value as any BinaryInteger: String(value)
+            case let value as any BinaryFloatingPoint: String(format: "%0.1f", value as! CVarArg)
+            case let value as Bool: value ? "x" : ""
+            case let value as any RawRepresentable: encode(value: value.rawValue)
+            case let value as DateOnly: Self.dateFormatter.string(from: value.date)
+            case let value as TimeOnly: Self.timeFormatter.string(from: value.date)
+            case let value as Flight.Approach:
+                [value.count,
+                 value.type,
+                 value.runway as Any,
+                 value.airport,
+                 value.comments as Any]
+                    .map { encode(value: $0) }.joined(separator: ";")
+            case let value as Flight.Member:
+                [value.person.name,
+                 value.role,
+                 value.person.email as Any]
+                    .map { encode(value: $0) }.joined(separator: ";")
+            default: ""
         }
-        if let value = value as? Flight.Member {
-            let vars: Array<Any> = [value.person.name as Any,
-                                    value.role as Any,
-                                    value.person.email as Any]
-            return vars.map { encode(value: $0) }.joined(separator: ";")
-        }
-        return ""
     }
 }
 
