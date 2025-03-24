@@ -70,8 +70,8 @@ package struct Flight: Record {
     // MARK: Computed Properties
     
     package var landingsAll: UInt { landingsDay + landingsNight }
-    package var landingsDayFullStop: UInt { landingsFullStop - landingsNightFullStop }
-    
+    package var landingsDayFullStop: UInt { UInt(max(Int(landingsFullStop) - Int(landingsNightFullStop), 0)) }
+
     package var dutyTime: TimeInterval? {
         guard let onDuty, let offDuty else { return nil }
         return offDuty.timeIntervalSince(onDuty)
