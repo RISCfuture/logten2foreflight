@@ -1,22 +1,7 @@
 import Foundation
 
 package struct Aircraft {
-    package private(set) var tailNumber: String?
-    package private(set) var simulatorType: SimulatorType
-    package private(set) var typeCode: String?
-    package private(set) var year: UInt?
-    package private(set) var make: String
-    package private(set) var model: String
-    package private(set) var category: Category
-    package private(set) var `class`: Class?
-    package private(set) var gearType: GearType?
-    package private(set) var engineType: EngineType?
-    package private(set) var complex: Bool
-    package private(set) var highPerformance: Bool
-    package private(set) var pressurized: Bool
-    package private(set) var technicallyAdvanced: Bool
-
-    static var fieldMapping: Dictionary<String, PartialKeyPath<Self>> {
+    static var fieldMapping: [String: PartialKeyPath<Self>] {
         [
             "AircraftID": \.tailNumber,
             "EquipmentType": \.simulatorType,
@@ -34,6 +19,21 @@ package struct Aircraft {
             "TAA": \.technicallyAdvanced
         ]
     }
+
+    package private(set) var tailNumber: String?
+    package private(set) var simulatorType: SimulatorType
+    package private(set) var typeCode: String?
+    package private(set) var year: UInt?
+    package private(set) var make: String
+    package private(set) var model: String
+    package private(set) var category: Category
+    package private(set) var `class`: Class?
+    package private(set) var gearType: GearType?
+    package private(set) var engineType: EngineType?
+    package private(set) var complex: Bool
+    package private(set) var highPerformance: Bool
+    package private(set) var pressurized: Bool
+    package private(set) var technicallyAdvanced: Bool
 
     package init(tailNumber: String,
                  simulatorType: SimulatorType,
@@ -64,7 +64,6 @@ package struct Aircraft {
         self.pressurized = pressurized
         self.technicallyAdvanced = technicallyAdvanced
     }
-
 
     package enum GearType: String {
         case amphibian = "AM"

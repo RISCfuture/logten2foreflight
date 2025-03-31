@@ -1,31 +1,31 @@
 import Foundation
 
 package struct Aircraft: IdentifiableRecord {
-    
+
     // MARK: Properties
-    
+
     package let type: AircraftType
     package let tailNumber: String
     package var id: String { tailNumber }
-    
+
     package let year: UInt?
     package let complex: Bool
     package let highPerformance: Bool
     package let pressurized: Bool
     package let technicallyAdvanced: Bool
-    
+
     package let retractableGear: Bool
     package let amphibious: Bool
     package let floats: Bool
     package let skis: Bool
     package let skids: Bool
     package let tailwheel: Bool
-    
+
     package let radial: Bool
     package let diesel: Bool
-    
+
     // MARK: Initializers
-    
+
     init(aircraft: CNAircraft,
          typeCodeProperty: KeyPath<CNAircraftType, String?>,
          simTypeProperty: KeyPath<CNAircraftType, String?>,

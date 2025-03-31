@@ -1,91 +1,7 @@
 import Foundation
 
 package struct Flight {
-    package private(set) var date: Date
-    package private(set) var aircraftID: String?
-    
-    package private(set) var from: String?
-    package private(set) var to: String?
-    package private(set) var route: String?
-    
-    package private(set) var out: Date?
-    package private(set) var off: Date?
-    package private(set) var on: Date?
-    package private(set) var `in`: Date?
-    package private(set) var onDuty: Date?
-    package private(set) var offDuty: Date?
-    
-    package private(set) var totalTime = 0.0
-    package private(set) var PICTime = 0.0
-    package private(set) var SICTime = 0.0
-    package private(set) var nightTime = 0.0
-    package private(set) var soloTime = 0.0
-    package private(set) var crossCountryTime = 0.0
-    package private(set) var NVGTime = 0.0
-    
-    package private(set) var NVGOps: UInt = 0
-    
-    package private(set) var distance: Double?
-    
-    package private(set) var takeoffsDay: UInt = 0
-    package private(set) var landingsDayFullStop: UInt = 0
-    package private(set) var takeoffsNight: UInt = 0
-    package private(set) var landingsNightFullStop: UInt = 0
-    package private(set) var landingsAll: UInt = 0
-    
-    package private(set) var actualInstrumentTime = 0.0
-    package private(set) var simulatedInstrumentTime = 0.0
-    
-    package private(set) var hobbsStart: Double?
-    package private(set) var hobbsEnd: Double?
-    package private(set) var tachStart: Double?
-    package private(set) var tachEnd: Double?
-    
-    package private(set) var holds: UInt = 0
-    package private(set) var approaches = Array<Approach>()
-    
-    package private(set) var dualGiven = 0.0
-    package private(set) var dualReceived = 0.0
-    package private(set) var simulatorTime = 0.0
-    package private(set) var groundTime = 0.0
-    
-    package private(set) var people = Array<Member>()
-    
-    package private(set) var flightReview = false
-    package private(set) var checkride = false
-    package private(set) var IPC = false
-    package private(set) var NVGProficiency = false
-    package private(set) var recurrent = false
-    
-    package private(set) var remarks: String?
-    
-    var dateFormatted: DateOnly { .init(date) }
-    var outFormatted: TimeOnly? {
-        guard let out else { return nil }
-        return .init(out)
-    }
-    var offFormatted: TimeOnly? {
-        guard let off else { return nil }
-        return .init(off)
-    }
-    var onFormatted: TimeOnly? {
-        guard let on else { return nil }
-        return .init(on)
-    }
-    var inFormatted: TimeOnly? {
-        guard let `in` else { return nil }
-        return .init(`in`)
-    }
-    var onDutyFormatted: TimeOnly? {
-        guard let onDuty else { return nil }
-        return .init(onDuty)
-    }
-    var offDutyFormatted: TimeOnly? {
-        guard let offDuty else { return nil }
-        return .init(offDuty)
-    }
-    
-    static var fieldMapping: Dictionary<String, PartialKeyPath<Self>?> {
+    static var fieldMapping: [String: PartialKeyPath<Self>?] {
         [
             "Date": \.dateFormatted,
             "AircraftID": \.aircraftID,
@@ -152,7 +68,91 @@ package struct Flight {
             "PilotComments": \.remarks
         ]
     }
-    
+
+    package private(set) var date: Date
+    package private(set) var aircraftID: String?
+
+    package private(set) var from: String?
+    package private(set) var to: String?
+    package private(set) var route: String?
+
+    package private(set) var out: Date?
+    package private(set) var off: Date?
+    package private(set) var on: Date?
+    package private(set) var `in`: Date?
+    package private(set) var onDuty: Date?
+    package private(set) var offDuty: Date?
+
+    package private(set) var totalTime = 0.0
+    package private(set) var PICTime = 0.0
+    package private(set) var SICTime = 0.0
+    package private(set) var nightTime = 0.0
+    package private(set) var soloTime = 0.0
+    package private(set) var crossCountryTime = 0.0
+    package private(set) var NVGTime = 0.0
+
+    package private(set) var NVGOps: UInt = 0
+
+    package private(set) var distance: Double?
+
+    package private(set) var takeoffsDay: UInt = 0
+    package private(set) var landingsDayFullStop: UInt = 0
+    package private(set) var takeoffsNight: UInt = 0
+    package private(set) var landingsNightFullStop: UInt = 0
+    package private(set) var landingsAll: UInt = 0
+
+    package private(set) var actualInstrumentTime = 0.0
+    package private(set) var simulatedInstrumentTime = 0.0
+
+    package private(set) var hobbsStart: Double?
+    package private(set) var hobbsEnd: Double?
+    package private(set) var tachStart: Double?
+    package private(set) var tachEnd: Double?
+
+    package private(set) var holds: UInt = 0
+    package private(set) var approaches = [Approach]()
+
+    package private(set) var dualGiven = 0.0
+    package private(set) var dualReceived = 0.0
+    package private(set) var simulatorTime = 0.0
+    package private(set) var groundTime = 0.0
+
+    package private(set) var people = [Member]()
+
+    package private(set) var flightReview = false
+    package private(set) var checkride = false
+    package private(set) var IPC = false
+    package private(set) var NVGProficiency = false
+    package private(set) var recurrent = false
+
+    package private(set) var remarks: String?
+
+    var dateFormatted: DateOnly { .init(date) }
+    var outFormatted: TimeOnly? {
+        guard let out else { return nil }
+        return .init(out)
+    }
+    var offFormatted: TimeOnly? {
+        guard let off else { return nil }
+        return .init(off)
+    }
+    var onFormatted: TimeOnly? {
+        guard let on else { return nil }
+        return .init(on)
+    }
+    var inFormatted: TimeOnly? {
+        guard let `in` else { return nil }
+        return .init(`in`)
+    }
+    var onDutyFormatted: TimeOnly? {
+        guard let onDuty else { return nil }
+        return .init(onDuty)
+    }
+    var offDutyFormatted: TimeOnly? {
+        guard let offDuty else { return nil }
+        return .init(offDuty)
+    }
+
     package init(date: Date,
                  aircraftID: String? = nil,
                  from: String? = nil,
@@ -185,12 +185,12 @@ package struct Flight {
                  tachStart: Double? = nil,
                  tachEnd: Double? = nil,
                  holds: UInt = 0,
-                 approaches: [Flight.Approach] = Array<Approach>(),
+                 approaches: [Self.Approach] = [Approach](),
                  dualGiven: Double = 0.0,
                  dualReceived: Double = 0.0,
                  simulatorTime: Double = 0.0,
                  groundTime: Double = 0.0,
-                 people: [Flight.Member] = Array<Member>(),
+                 people: [Self.Member] = [Member](),
                  flightReview: Bool = false,
                  checkride: Bool = false,
                  IPC: Bool = false,
@@ -242,14 +242,14 @@ package struct Flight {
         self.recurrent = recurrent
         self.remarks = remarks
     }
-    
+
     package struct Approach {
         package private(set) var count: UInt
         package private(set) var type: ApproachType
         package private(set) var runway: String?
         package private(set) var airport: String
         package private(set) var comments: String?
-        
+
         package init(count: UInt,
                      type: Flight.ApproachType,
                      runway: String? = nil,
@@ -262,7 +262,7 @@ package struct Flight {
             self.comments = comments
         }
     }
-    
+
     package enum ApproachType: String {
         case ASR_SRA = "ASR/SRA"
         case GCA
@@ -282,17 +282,17 @@ package struct Flight {
         case TACAN
         case VOR
     }
-    
+
     package struct Member {
         package private(set) var person: Person
         package private(set) var role: Role
-        
+
         package init(person: Person, role: Flight.Role) {
             self.person = person
             self.role = role
         }
     }
-    
+
     package enum Role: String {
         case PIC
         case SIC

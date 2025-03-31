@@ -1,20 +1,20 @@
 package struct AircraftType: IdentifiableRecord {
-    
+
     // MARK: Properties
-    
+
     package let id: String
     package let typeCode: String
     package let make: String
     package let model: String
     package let category: Category
     package let `class`: Class?
-    
+
     package let simulatorType: SimulatorType?
     package let simulatorCategoryClass: SimulatorCategoryClass?
     package let engineType: EngineType?
-    
+
     // MARK: Computed Properties
-    
+
     package var simulatorAwareTypeCode: String? {
         switch category {
             case .simulator:
@@ -25,14 +25,14 @@ package struct AircraftType: IdentifiableRecord {
             default: return typeCode
         }
     }
-    
+
     // MARK: Initializers
-    
+
     init(aircraftType: CNAircraftType,
          typeCodeProperty: KeyPath<CNAircraftType, String?>,
          simTypeProperty: KeyPath<CNAircraftType, String?>,
          simCategoryProperty: KeyPath<CNAircraftType, String?>) {
-        
+
         id = aircraftType.aircraftType_type
         typeCode = aircraftType[keyPath: typeCodeProperty] ?? aircraftType.aircraftType_type
         make = aircraftType.aircraftType_make
@@ -42,7 +42,7 @@ package struct AircraftType: IdentifiableRecord {
             guard let title = aircraftType.aircraftType_aircraftClass?.logTenProperty_key else { return nil }
             return .init(rawValue: title)
         }()
-        
+
         simulatorType = {
             guard let typeString = aircraftType[keyPath: simTypeProperty] else { return nil }
             return .init(rawValue: typeString)
@@ -56,9 +56,9 @@ package struct AircraftType: IdentifiableRecord {
             return .init(rawValue: key)
         }()
     }
-    
+
     // MARK: Enums
-    
+
     package enum Category: String, RecordEnum {
         case airplane = "flight_category1"
         case rotorcraft = "flight_category2"
@@ -73,7 +73,7 @@ package struct AircraftType: IdentifiableRecord {
         case UAV = "flight_category11"
         case other = "flight_category12"
     }
-    
+
     package enum Class: String, RecordEnum {
         case multiEngineLand = "flight_aircraftClass1"
         case singleEngineLand = "flight_aircraftClass2"
@@ -85,7 +85,7 @@ package struct AircraftType: IdentifiableRecord {
         case freeBalloon = "flight_aircraftClass8"
         case helicopter = "flight_aircraftClass9"
     }
-    
+
     package enum EngineType: String, RecordEnum {
         case jet = "flight_engineType1"
         case turbine = "flight_engineType2"
@@ -100,14 +100,14 @@ package struct AircraftType: IdentifiableRecord {
         case other = "flight_engineType11"
         case electric = "flight_engineType12"
     }
-    
+
     package enum SimulatorType: String, RecordEnum {
         case BATD
         case AATD
         case FTD
         case FFS
     }
-    
+
     package enum SimulatorCategoryClass: String, RecordEnum {
         case airplaneSingleEngineLand = "ASEL"
         case airplaneSingleEngineSea = "ASES"

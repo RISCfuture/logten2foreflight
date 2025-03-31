@@ -1,24 +1,24 @@
-import Foundation
 import CoreData
+import Foundation
 
-fileprivate let nightFullStopField = "Night Full Stops"
-fileprivate let proficiencyField = "FAR 61.58"
-fileprivate let checkrideField = "Checkride"
+private let nightFullStopField = "Night Full Stops"
+private let proficiencyField = "FAR 61.58"
+private let checkrideField = "Checkride"
 
-fileprivate let safetyPilotField = "Safety Pilot"
-fileprivate let examinerField = "Examiner"
+private let safetyPilotField = "Safety Pilot"
+private let examinerField = "Examiner"
 
 extension Reader {
-    func fetchFlights(aircraft: Array<Aircraft>) throws -> Array<Flight> {
+    func fetchFlights(aircraft: [Aircraft]) throws -> [Flight] {
         let request = CNFlight.fetchRequest()
         let flights = try container.viewContext.fetch(request)
-        
+
         let nightFullStopProperty = try flightCustomLanding(for: nightFullStopField)
         let proficiencyProperty = try flightCustomNote(for: proficiencyField)
         let checkrideProperty = try flightCustomNote(for: checkrideField)
         let safetyPilotProperty = try flightCrewCustomPerson(for: safetyPilotField)
         let examinerProperty = try flightCrewCustomPerson(for: examinerField)
-        
+
         return flights.compactMap { flight in
             guard let aircraft = aircraft.first(where: { $0.tailNumber == flight.flight_aircraft?.aircraft_aircraftID }) else {
                 return nil
@@ -32,7 +32,7 @@ extension Reader {
                          examinerProperty: examinerProperty)
         }
     }
-    
+
     private func flightCustomLanding(for title: String) throws -> KeyPath<CNFlight, NSNumber?> {
         let request = CNLogTenCustomizationProperty.fetchRequest(title: title, keyPrefix: "flight_customLanding")
         let result = try container.viewContext.fetch(request)
@@ -53,7 +53,7 @@ extension Reader {
             default: preconditionFailure("Unknown custom attribute \(property.logTenProperty_key)")
         }
     }
-    
+
     private func flightCustomNote(for title: String) throws -> KeyPath<CNFlight, String?> {
         let request = CNLogTenCustomizationProperty.fetchRequest(title: title, keyPrefix: "flight_customNote")
         let result = try container.viewContext.fetch(request)
@@ -74,7 +74,7 @@ extension Reader {
             default: preconditionFailure("Unknown custom attribute \(property.logTenProperty_key)")
         }
     }
-    
+
     private func flightCrewCustomPerson(for title: String) throws -> KeyPath<CNFlightCrew, CNPerson?> {
         let request = CNLogTenCustomizationProperty.fetchRequest(title: title, keyPrefix: "flight_selectedCrewCustom")
         let result = try container.viewContext.fetch(request)

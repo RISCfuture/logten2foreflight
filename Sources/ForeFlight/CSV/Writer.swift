@@ -1,5 +1,5 @@
-import Foundation
 @preconcurrency import CodableCSV
+import Foundation
 
 package class Writer {
     package let logbook: Logbook

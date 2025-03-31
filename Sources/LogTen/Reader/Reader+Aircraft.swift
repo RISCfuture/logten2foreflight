@@ -1,18 +1,18 @@
-fileprivate let typeCodeField = "Type Code"
-fileprivate let simTypeField = "Sim Type"
-fileprivate let simCategoryField = "Sim A/C Cat"
-fileprivate let dieselField = "Diesel Engine"
+private let typeCodeField = "Type Code"
+private let simTypeField = "Sim Type"
+private let simCategoryField = "Sim A/C Cat"
+private let dieselField = "Diesel Engine"
 
 extension Reader {
-    func fetchAircraft() throws -> Array<Aircraft> {
+    func fetchAircraft() throws -> [Aircraft] {
         let request = CNAircraft.fetchRequest()
         let aircraft = try container.viewContext.fetch(request)
-        
+
         let typeCodeProperty = try aircraftTypeCustomAttribute(for: typeCodeField)
         let simTypeProperty = try aircraftTypeCustomAttribute(for: simTypeField)
         let simCategoryProperty = try aircraftTypeCustomAttribute(for: simCategoryField)
         let dieselProperty = try aircraftCustomAttribute(for: dieselField)
-        
+
         return aircraft.map { aircraft in
                 .init(aircraft: aircraft,
                       typeCodeProperty: typeCodeProperty,
@@ -21,7 +21,7 @@ extension Reader {
                       dieselProperty: dieselProperty)
         }
     }
-    
+
     private func aircraftTypeCustomAttribute(for title: String) throws -> KeyPath<CNAircraftType, String?> {
         let request = CNLogTenCustomizationProperty.fetchRequest(title: title, keyPrefix: "aircraftType_customAttribute")
         let result = try container.viewContext.fetch(request)
@@ -37,7 +37,7 @@ extension Reader {
             default: preconditionFailure("Unknown custom attribute \(property.logTenProperty_key)")
         }
     }
-    
+
     private func aircraftCustomAttribute(for title: String) throws -> KeyPath<CNAircraft, Bool> {
         let request = CNLogTenCustomizationProperty.fetchRequest(title: title, keyPrefix: "aircraft_customAttribute")
         let result = try container.viewContext.fetch(request)

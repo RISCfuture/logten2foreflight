@@ -1,17 +1,16 @@
-import Foundation
 @preconcurrency import CodableCSV
+import Foundation
 
 class Template {
     private let templateURL = Bundle.module.url(forResource: "logbook_template", withExtension: "csv")!
-    
-    func buildRows() throws -> Array<Row> {
+
+    func buildRows() throws -> [Row] {
         let reader = try CSVReader(input: templateURL)
-        
-        
+
         var aircraftFieldsRow: Array<String>!,
             entryFieldsRow: Array<String>!,
-            rows = Array<Row>()
-        
+            rows = [Row]()
+
         while let row = try reader.readRow() {
             switch row.first {
                 case "AIRCRAFT_FIELDS":
@@ -28,12 +27,12 @@ class Template {
                 default: fatalError("Unknown row type ‘\(String(describing: row.first))’")
             }
         }
-        
+
         return rows
     }
-    
-    private func aircraftFields(from row: Array<String>) -> Array<PartialKeyPath<Aircraft>> {
-        var fields = Array<PartialKeyPath<Aircraft>>()
+
+    private func aircraftFields(from row: [String]) -> [PartialKeyPath<Aircraft>] {
+        var fields = [PartialKeyPath<Aircraft>]()
         for fieldName in row {
             guard !fieldName.isEmpty else { continue }
             guard let field = Aircraft.fieldMapping[fieldName] else { fatalError("No var on Aircraft for \(fieldName)") }
@@ -41,14 +40,14 @@ class Template {
         }
         return fields
     }
-    
-    private func entryFields(from row: Array<String>) -> Array<PartialKeyPath<Flight>?> {
+
+    private func entryFields(from row: [String]) -> [PartialKeyPath<Flight>?] {
         row.map { fieldName in
             guard let field = Flight.fieldMapping[fieldName] else { fatalError("No var on Flight for \(fieldName)") }
             return field
         }
     }
-    
+
     enum Row {
         case `static`(values: Array<String>)
         case aircraft(fields: Array<PartialKeyPath<Aircraft>?>)

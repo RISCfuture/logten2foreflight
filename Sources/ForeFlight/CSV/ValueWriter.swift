@@ -1,7 +1,7 @@
 import Foundation
 
-fileprivate let zulu = TimeZone(secondsFromGMT: 0)!,
-                posix = Locale(identifier: "en_US_POSIX")
+private let zulu = TimeZone(secondsFromGMT: 0)!,
+            posix = Locale(identifier: "en_US_POSIX")
 
 class ValueWriter<Record> {
     private static var dateFormatter: DateFormatter {
@@ -22,13 +22,13 @@ class ValueWriter<Record> {
         return formatter
     }
 
-    private let fields: Array<PartialKeyPath<Record>?>
+    private let fields: [PartialKeyPath<Record>?]
 
-    init(fields: Array<PartialKeyPath<Record>?>) {
+    init(fields: [PartialKeyPath<Record>?]) {
         self.fields = fields
     }
 
-    func row(for record: Record) -> Array<String> {
+    func row(for record: Record) -> [String] {
         fields.map { field in
             guard let field else { return "" }
             return encode(value: record[keyPath: field])
@@ -63,10 +63,12 @@ class ValueWriter<Record> {
 
 struct DateOnly {
     var date: Date
+
     init(_ date: Date) { self.date = date }
 }
 
 struct TimeOnly {
     var date: Date
+
     init(_ date: Date) { self.date = date }
 }

@@ -1,19 +1,19 @@
 import Foundation
 
+/// A LogTen logbook consisting of flights, aircraft, and people.
 public actor Logbook {
-    
+
     // MARK: Data
-    
-    package let aircraft: Array<Aircraft>
-    package let flights: Array<Flight>
-    package let people: Array<Person>
-    
-    
+
+    package let aircraft: [Aircraft]
+    package let flights: [Flight]
+    package let people: [Person]
+
     // MARK: Initializers
-    
-    init(aircraft: Array<Aircraft>,
-         flights: Array<Flight>,
-         people: Array<Person>) {
+
+    init(aircraft: [Aircraft],
+         flights: [Flight],
+         people: [Person]) {
         self.aircraft = Array(aircraft)
         self.flights = Array(flights)
         self.people = Array(people)

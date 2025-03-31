@@ -1,13 +1,13 @@
 import Foundation
 
 package struct Flight: Record {
-    
+
     // MARK: Properties
-    
+
     package let aircraft: Aircraft?
-    
-    package let approaches: Array<Approach>
-    
+
+    package let approaches: [Approach]
+
     package let PIC: Person?
     package let SIC: Person?
     package let instructor: Person?
@@ -15,9 +15,9 @@ package struct Flight: Record {
     package let safetyPilot: Person?
     package let examiner: Person?
     package let flightEngineer: Person?
-    package let flightAttendants: Array<Person>
-    package let passengers: Array<Person>
-    
+    package let flightAttendants: [Person]
+    package let passengers: [Person]
+
     package let date: Date
     package let out: Date?
     package let off: Date?
@@ -29,12 +29,12 @@ package struct Flight: Record {
     package let hobbsEnd: Double?
     package let tachStart: Double?
     package let tachEnd: Double?
-    
+
     package let from: Place?
     package let to: Place?
     package let route: String?
     package let distance: Double?
-    
+
     package let totalTime: UInt // minutes
     package let PICTime: UInt // minutes
     package let SICTime: UInt // minutes
@@ -48,7 +48,7 @@ package struct Flight: Record {
     package let simulatorTime: UInt // minutes
     package let groundTime: UInt // minutes
     package let NVGTime: UInt // minutes
-    
+
     package let takeoffsDay: UInt
     package let takeoffsNight: UInt
     package let landingsDay: UInt
@@ -57,18 +57,18 @@ package struct Flight: Record {
     package let landingsNightFullStop: UInt
     package let takeoffsNVG: UInt
     package let landingsNVG: UInt
-    
+
     package let holds: UInt
-    
+
     package let flightReview: Bool
     package let IPC: Bool
     package let proficiencyCheck: Bool
     package let checkride: Bool
-    
+
     package let remarks: String?
-    
+
     // MARK: Computed Properties
-    
+
     package var landingsAll: UInt { landingsDay + landingsNight }
     package var landingsDayFullStop: UInt { UInt(max(Int(landingsFullStop) - Int(landingsNightFullStop), 0)) }
 
@@ -76,48 +76,48 @@ package struct Flight: Record {
         guard let onDuty, let offDuty else { return nil }
         return offDuty.timeIntervalSince(onDuty)
     }
-    
+
     package var dutyHours: Double? {
         guard let dutyTime else { return nil }
         return dutyTime / 3600
     }
-    
+
     package var blockTime: TimeInterval? {
         guard let out, let `in` else { return nil }
         return `in`.timeIntervalSince(out)
     }
-    
+
     package var blockHours: Double? {
         guard let blockTime else { return nil }
         return blockTime / 3600
     }
-    
+
     package var flightTime: TimeInterval? {
         guard let off, let on else { return nil }
         return on.timeIntervalSince(off)
     }
-    
+
     package var flightHours: Double? {
         guard let flightTime else { return nil }
         return flightTime / 3600
     }
-    
-    package var totalHours: Double { Double(totalTime)/60 }
-    package var PICHours: Double { Double(PICTime)/60 }
-    package var SICHours: Double { Double(SICTime)/60 }
-    package var soloHours: Double { Double(soloTime)/60 }
-    package var nightHours: Double { Double(nightTime)/60 }
-    package var crossCountryHours: Double { Double(crossCountryTime)/60 }
-    package var dualGivenHours: Double { Double(dualGivenTime)/60 }
-    package var dualReceivedHours: Double { Double(dualReceivedTime)/60 }
-    package var actualInstrumentHours: Double { Double(actualInstrumentTime)/60 }
-    package var simulatedInstrumentHours: Double { Double(simulatedInstrumentTime)/60 }
-    package var simulatorHours: Double { Double(simulatorTime)/60 }
-    package var groundHours: Double { Double(groundTime)/60 }
-    package var NVGHours: Double { Double(NVGTime)/60 }
-    
+
+    package var totalHours: Double { Double(totalTime) / 60 }
+    package var PICHours: Double { Double(PICTime) / 60 }
+    package var SICHours: Double { Double(SICTime) / 60 }
+    package var soloHours: Double { Double(soloTime) / 60 }
+    package var nightHours: Double { Double(nightTime) / 60 }
+    package var crossCountryHours: Double { Double(crossCountryTime) / 60 }
+    package var dualGivenHours: Double { Double(dualGivenTime) / 60 }
+    package var dualReceivedHours: Double { Double(dualReceivedTime) / 60 }
+    package var actualInstrumentHours: Double { Double(actualInstrumentTime) / 60 }
+    package var simulatedInstrumentHours: Double { Double(simulatedInstrumentTime) / 60 }
+    package var simulatorHours: Double { Double(simulatorTime) / 60 }
+    package var groundHours: Double { Double(groundTime) / 60 }
+    package var NVGHours: Double { Double(NVGTime) / 60 }
+
     // MARK: Initializers
-    
+
     init(flight: CNFlight,
          aircraft: Aircraft,
          nightFullStopProperty: KeyPath<CNFlight, NSNumber?>,
@@ -139,7 +139,7 @@ package struct Flight: Record {
         flightAttendants = (flight.flight_flightCrew?.flightAttendants ?? []).compactMap { .init(person: $0) }
         passengers = (flight.flight_flightPassengers?.passengers ?? [])
             .compactMap { .init(person: $0) }
-        
+
         date = flight.flight_flightDate
         out = flight.flight_actualDepartureTime
         off = flight.flight_takeoffTime
@@ -151,12 +151,12 @@ package struct Flight: Record {
         hobbsEnd = flight.flight_hobbsStop?.doubleValue
         tachStart = flight.flight_tachStart?.doubleValue
         tachEnd = flight.flight_tachStop?.doubleValue
-        
+
         from = .init(place: flight.flight_fromPlace)
         to = .init(place: flight.flight_toPlace)
         route = flight.flight_route
         distance = flight.flight_distance?.doubleValue
-        
+
         totalTime = flight.flight_totalTime?.uintValue ?? 0
         PICTime = flight.flight_pic?.uintValue ?? 0
         SICTime = flight.flight_sic?.uintValue ?? 0
@@ -170,7 +170,7 @@ package struct Flight: Record {
         simulatorTime = flight.flight_simulator?.uintValue ?? 0
         groundTime = flight.flight_ground?.uintValue ?? 0
         NVGTime = flight.flight_nightVisionGoggle?.uintValue ?? 0
-        
+
         takeoffsDay = flight.flight_dayTakeoffs?.uintValue ?? 0
         takeoffsNight = flight.flight_nightTakeoffs?.uintValue ?? 0
         landingsDay = flight.flight_dayLandings?.uintValue ?? 0
@@ -179,14 +179,14 @@ package struct Flight: Record {
         landingsNightFullStop = flight[keyPath: nightFullStopProperty]?.uintValue ?? 0
         takeoffsNVG = flight.flight_nightVisionGoggleTakeoffs?.uintValue ?? 0
         landingsNVG = flight.flight_nightVisionGoggleLandings?.uintValue ?? 0
-        
+
         holds = flight.flight_holds?.uintValue ?? 0
-        
+
         flightReview = flight.flight_review?.boolValue ?? false
         IPC = flight.flight_instrumentProficiencyCheck?.boolValue ?? false
         proficiencyCheck = flight[keyPath: proficiencyProperty]?.isPresent ?? false
         checkride = flight[keyPath: checkrideProperty]?.isPresent ?? false
-        
+
         remarks = flight.flight_remarks
     }
 }
