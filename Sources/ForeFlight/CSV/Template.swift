@@ -31,18 +31,17 @@ class Template {
         return rows
     }
 
-    private func aircraftFields(from row: [String]) -> [PartialKeyPath<Aircraft>] {
-        var fields = [PartialKeyPath<Aircraft>]()
-        for fieldName in row {
-            guard !fieldName.isEmpty else { continue }
+    private func aircraftFields(from row: [String]) -> [PartialKeyPath<Aircraft>?] {
+        row.map { fieldName in
+            guard !fieldName.isEmpty else { return nil }
             guard let field = Aircraft.fieldMapping[fieldName] else { fatalError("No var on Aircraft for \(fieldName)") }
-            fields.append(field)
+            return field
         }
-        return fields
     }
 
     private func entryFields(from row: [String]) -> [PartialKeyPath<Flight>?] {
         row.map { fieldName in
+            guard !fieldName.isEmpty else { return nil }
             guard let field = Flight.fieldMapping[fieldName] else { fatalError("No var on Flight for \(fieldName)") }
             return field
         }

@@ -1,22 +1,22 @@
 import Foundation
 
 package struct Aircraft {
-    static var fieldMapping: [String: PartialKeyPath<Self>] {
+    static var fieldMapping: [String: PartialKeyPath<Aircraft>] {
         [
-            "AircraftID": \.tailNumber,
-            "EquipmentType": \.simulatorType,
-            "TypeCode": \.typeCode,
-            "Year": \.year,
-            "Make": \.make,
-            "Model": \.model,
-            "Category": \.category,
-            "Class": \.class,
-            "GearType": \.gearType,
-            "EngineType": \.engineType,
-            "Complex": \.complex,
-            "HighPerformance": \.highPerformance,
-            "Pressurized": \.pressurized,
-            "TAA": \.technicallyAdvanced
+            "AircraftID": \Aircraft.tailNumber,
+            "EquipmentType": \Aircraft.simulatorType,
+            "TypeCode": \Aircraft.typeCode,
+            "Year": \Aircraft.year,
+            "Make": \Aircraft.make,
+            "Model": \Aircraft.model,
+            "Category": \Aircraft.category,
+            "Class": \Aircraft.class,
+            "GearType": \Aircraft.gearType,
+            "EngineType": \Aircraft.engineType,
+            "Complex": \Aircraft.complex,
+            "HighPerformance": \Aircraft.highPerformance,
+            "Pressurized": \Aircraft.pressurized,
+            "TAA": \Aircraft.technicallyAdvanced
         ]
     }
 

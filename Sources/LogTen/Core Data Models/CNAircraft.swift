@@ -36,7 +36,7 @@ final class CNAircraft: NSManagedObject {
     static func fetchRequest() -> NSFetchRequest<CNAircraft> {
         let request = NSFetchRequest<CNAircraft>(entityName: "Aircraft")
         request.sortDescriptors = [
-            .init(keyPath: \Self.aircraft_aircraftID, ascending: true)
+            .init(keyPath: \CNAircraft.aircraft_aircraftID, ascending: true)
         ]
         request.includesSubentities = true
         return request

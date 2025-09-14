@@ -31,7 +31,8 @@ class ValueWriter<Record> {
     func row(for record: Record) -> [String] {
         fields.map { field in
             guard let field else { return "" }
-            return encode(value: record[keyPath: field])
+            let value = record[keyPath: field]
+            return encode(value: value)
         }
     }
 
@@ -59,16 +60,4 @@ class ValueWriter<Record> {
             default: ""
         }
     }
-}
-
-struct DateOnly {
-    var date: Date
-
-    init(_ date: Date) { self.date = date }
-}
-
-struct TimeOnly {
-    var date: Date
-
-    init(_ date: Date) { self.date = date }
 }
