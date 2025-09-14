@@ -67,6 +67,12 @@ public class Converter {
     private func convert(entry: LogTen.Flight) -> ForeFlight.Flight? {
         guard let aircraft = entry.aircraft else { return nil }
 
+        // Use the actual multiPilot field from the aircraft type
+        let multiPilotTime = aircraft.type.multiPilot ? entry.totalHours : 0
+
+        // Examiner time only counts when the current user is the examiner
+        let examinerTime = (entry.examiner?.isMe ?? false) ? entry.totalHours : 0
+
         return .init(date: entry.date,
                      aircraftID: aircraft.tailNumber,
                      from: entry.from?.ICAO_or_LID,
@@ -110,6 +116,9 @@ public class Converter {
                      IPC: entry.IPC,
                      NVGProficiency: false,
                      recurrent: entry.proficiencyCheck,
+                     PICUSTime: entry.PICHours,  // Treat PICUS as PIC per user request
+                     multiPilotTime: multiPilotTime,
+                     examinerTime: examinerTime,
                      remarks: entry.remarks)
     }
 

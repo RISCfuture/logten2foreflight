@@ -1,55 +1,58 @@
-@preconcurrency import CodableCSV
 import Foundation
+import StreamingCSV
 
 class Template {
     private let templateURL = Bundle.module.url(forResource: "logbook_template", withExtension: "csv")!
 
-    func buildRows() throws -> [Row] {
-        let reader = try CSVReader(input: templateURL)
+    func buildRows() async throws -> [Row] {
+        let reader = try StreamingCSVReader(url: templateURL)
 
-        var aircraftFieldsRow: Array<String>!,
-            entryFieldsRow: Array<String>!,
-            rows = [Row]()
+        var rows = [Row]()
+        var lineNumber = 0
+        var aircraftFields: Array<String>!
+        var flightFields: Array<String>!
 
-        while let row = try reader.readRow() {
-            switch row.first {
-                case "AIRCRAFT_FIELDS":
-                    rows.append(.static(values: Array(row[1...])))
-                    aircraftFieldsRow = Array(row[1...])
-                case "FLIGHT_FIELDS":
-                    rows.append(.static(values: Array(row[1...])))
-                    entryFieldsRow = Array(row[1...])
-                case "AIRCRAFT":
-                    rows.append(.aircraft(fields: aircraftFields(from: aircraftFieldsRow)))
-                case "FLIGHTS":
-                    rows.append(.entries(fields: entryFields(from: entryFieldsRow)))
-                case "STATIC": rows.append(.static(values: Array(row[1...])))
-                default: fatalError("Unknown row type ‘\(String(describing: row.first))’")
+        for try await row in await reader.rows() {
+            lineNumber += 1
+
+            switch lineNumber {
+                case 1...4:
+                    // Static header rows (ForeFlight Logbook Import, blank, Aircraft Table, Text types)
+                    rows.append(.static(values: row))
+                case 5:
+                    // Aircraft field names row - save for later use
+                    aircraftFields = row
+                    rows.append(.static(values: row))
+                case 6:
+                    // This is where aircraft data will be inserted
+                    rows.append(.aircraft(fields: aircraftFields))
+                case 7...13:
+                    // Static spacing rows
+                    rows.append(.static(values: row))
+                case 14:
+                    // Flight table header type row
+                    rows.append(.static(values: row))
+                case 15:
+                    // Flight field names row - save for later use
+                    flightFields = row
+                    rows.append(.static(values: row))
+                default:
+                    // Any additional rows (should be none in the template)
+                    break
             }
+        }
+
+        // After processing the template, add the entries row for flight data
+        if let flightFields = flightFields {
+            rows.append(.entries(fields: flightFields))
         }
 
         return rows
     }
 
-    private func aircraftFields(from row: [String]) -> [PartialKeyPath<Aircraft>?] {
-        row.map { fieldName in
-            guard !fieldName.isEmpty else { return nil }
-            guard let field = Aircraft.fieldMapping[fieldName] else { fatalError("No var on Aircraft for \(fieldName)") }
-            return field
-        }
-    }
-
-    private func entryFields(from row: [String]) -> [PartialKeyPath<Flight>?] {
-        row.map { fieldName in
-            guard !fieldName.isEmpty else { return nil }
-            guard let field = Flight.fieldMapping[fieldName] else { fatalError("No var on Flight for \(fieldName)") }
-            return field
-        }
-    }
-
     enum Row {
         case `static`(values: Array<String>)
-        case aircraft(fields: Array<PartialKeyPath<Aircraft>?>)
-        case entries(fields: Array<PartialKeyPath<Flight>?>)
+        case aircraft(fields: Array<String>)
+        case entries(fields: Array<String>)
     }
 }

@@ -54,6 +54,9 @@ take you 95% of the way there. In particular:
 - LogTen Pro does not have a field for indicating FAR 61.58 recurrent flights.
   You will need a "Custom Notes" field named "FAR 61.58". Flights with any
   non-empty value in this field will be considered recurrent checkrides.
+- LogTen Pro does not have a "US PIC" field. This is kept equal to PIC.
+- Examiner time will be credited for flights where the Examiner field is set to 
+  your crew profile (see "Crew and passengers" below).
 
 ### Aircraft and aircraft types
 

@@ -12,6 +12,7 @@ package struct AircraftType: IdentifiableRecord {
     package let simulatorType: SimulatorType?
     package let simulatorCategoryClass: SimulatorCategoryClass?
     package let engineType: EngineType?
+    package let multiPilot: Bool
 
     // MARK: Computed Properties
 
@@ -55,6 +56,7 @@ package struct AircraftType: IdentifiableRecord {
             guard let key = aircraftType.aircraftType_engineType?.logTenProperty_key else { return nil }
             return .init(rawValue: key)
         }()
+        multiPilot = aircraftType.aircraftType_multiPilot
     }
 
     // MARK: Enums

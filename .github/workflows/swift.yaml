@@ -17,8 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, macos-latest]
-        swift: ["6.0"]
+        os: [macos-latest]
+        swift: ["6.1"]
     steps:
       - uses: actions/checkout@v4
       - uses: SwiftyLab/setup-swift@latest

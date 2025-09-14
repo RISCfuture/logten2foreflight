@@ -1,5 +1,5 @@
-@preconcurrency import CodableCSV
 import Foundation
+import StreamingCSV
 
 package class Writer {
     package let logbook: Logbook
@@ -9,25 +9,35 @@ package class Writer {
     }
 
     package func write(to file: URL) async throws {
-        let writer = try CSVWriter(fileURL: file),
-            template = Template(),
-            rows = try template.buildRows()
+        let writer = try StreamingCSVWriter(url: file)
+        let template = Template()
+        let rows = try await template.buildRows()
+
+        // Determine the total number of columns (flights table has the most)
+        let totalColumns = 68  // Based on the ForeFlight template structure
 
         for row in rows {
             switch row {
                 case let .static(values):
-                    try writer.write(row: values)
-                case let .aircraft(fields):
-                    let valueWriter = ValueWriter(fields: fields)
+                    try await writer.writeRow(values)
+                case .aircraft:
                     for aircraft in await logbook.aircraft {
-                        try writer.write(row: valueWriter.row(for: aircraft))
+                        let csvRow = AircraftCSVRow(from: aircraft)
+                        // Convert to array and pad with empty strings
+                        var rowArray = csvRow.csvRow
+                        while rowArray.count < totalColumns {
+                            rowArray.append("")
+                        }
+                        try await writer.writeRow(rowArray)
                     }
-                case let .entries(fields):
-                    let valueWriter = ValueWriter(fields: fields)
+                case .entries:
                     for entry in await logbook.entries {
-                        try writer.write(row: valueWriter.row(for: entry))
+                        let csvRow = FlightCSVRow(from: entry)
+                        try await writer.writeRow(csvRow)
                     }
             }
         }
+
+        try await writer.flush()
     }
 }

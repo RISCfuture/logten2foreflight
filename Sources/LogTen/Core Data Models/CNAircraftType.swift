@@ -19,4 +19,5 @@ final class CNAircraftType: NSManagedObject {
     @NSManaged var aircraftType_customAttribute5: String?
 
     @NSManaged var aircraftType_engineType: CNLogTenCustomizationProperty?
+    @NSManaged var aircraftType_multiPilot: Bool
 }

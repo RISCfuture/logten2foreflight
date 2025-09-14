@@ -1,13 +1,13 @@
 {
-  "originHash" : "908b669f500b7afd8bac59e7b7dc930c7fc21a653c7f5efc8747baf175ffb585",
+  "originHash" : "71d6dc1984de8755d676be0f63779b80878521f366d5fab5151100040615c503",
   "pins" : [
     {
-      "identity" : "codablecsv",
+      "identity" : "streamingcsv",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/dehesa/CodableCSV.git",
+      "location" : "https://github.com/RISCfuture/StreamingCSV.git",
       "state" : {
-        "revision" : "99ace2cfdfbc19108b529c021005fb57a460e715",
-        "version" : "0.6.7"
+        "revision" : "4538df94633a0161063ccdcbeafe1c0fb816ba49",
+        "version" : "1.1.1"
       }
     },
     {
@@ -26,6 +26,24 @@
       "state" : {
         "revision" : "ce592ae52f982c847a4efc0dd881cc9eb32d29f2",
         "version" : "1.6.4"
+      }
+    },
+    {
+      "identity" : "swift-macro-toolkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/stackotter/swift-macro-toolkit",
+      "state" : {
+        "revision" : "569627091e1fbb8745d691aeeb008e7247dedb7c",
+        "version" : "0.6.1"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-syntax",
+      "state" : {
+        "revision" : "0687f71944021d616d34d922343dcef086855920",
+        "version" : "600.0.1"
       }
     }
   ],

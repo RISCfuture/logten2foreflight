@@ -2,28 +2,30 @@ import Foundation
 
 package struct DateOnly {
     package var date: Date
+
     package init(_ date: Date) { self.date = date }
 }
 
 package struct TimeOnly {
     package var date: Date
+
     package init(_ date: Date) { self.date = date }
 }
 
 package struct Flight {
     static var fieldMapping: [String: PartialKeyPath<Flight>?] {
         [
-            "Date": nil, // TODO: Fix dateFormatted
+            "Date": nil,  // Computed property - cannot use KeyPath
             "AircraftID": \Flight.aircraftID,
             "From": \Flight.from,
             "To": \Flight.to,
             "Route": \Flight.route,
-            "TimeOut": nil, // TODO: Fix outFormatted
-            "TimeOff": nil, // TODO: Fix offFormatted
-            "TimeOn": nil, // TODO: Fix onFormatted
-            "TimeIn": nil, // TODO: Fix inFormatted
-            "OnDuty": nil, // TODO: Fix onDutyFormatted
-            "OffDuty": nil, // TODO: Fix offDutyFormatted
+            "TimeOut": nil,  // Computed property - cannot use KeyPath
+            "TimeOff": nil,  // Computed property - cannot use KeyPath
+            "TimeOn": nil,  // Computed property - cannot use KeyPath
+            "TimeIn": nil,  // Computed property - cannot use KeyPath
+            "OnDuty": nil,  // Computed property - cannot use KeyPath
+            "OffDuty": nil,  // Computed property - cannot use KeyPath
             "TotalTime": \Flight.totalTime,
             "PIC": \Flight.PICTime,
             "SIC": \Flight.SICTime,
@@ -45,24 +47,24 @@ package struct Flight {
             "TachStart": \Flight.tachStart,
             "TachEnd": \Flight.tachEnd,
             "Holds": \Flight.holds,
-            "Approach1": nil, // TODO: Fix approach1
-            "Approach2": nil, // TODO: Fix approach2
-            "Approach3": nil, // TODO: Fix approach3
-            "Approach4": nil, // TODO: Fix approach4
-            "Approach5": nil, // TODO: Fix approach5
-            "Approach6": nil, // TODO: Fix approach6
+            "Approach1": nil,  // Computed property - cannot use KeyPath
+            "Approach2": nil,  // Computed property - cannot use KeyPath
+            "Approach3": nil,  // Computed property - cannot use KeyPath
+            "Approach4": nil,  // Computed property - cannot use KeyPath
+            "Approach5": nil,  // Computed property - cannot use KeyPath
+            "Approach6": nil,  // Computed property - cannot use KeyPath
             "DualGiven": \Flight.dualGiven,
             "DualReceived": \Flight.dualReceived,
             "SimulatedFlight": \Flight.simulatorTime,
             "GroundTraining": \Flight.groundTime,
             "InstructorName": nil,
             "InstructorComments": nil,
-            "Person1": nil, // TODO: Fix person1
-            "Person2": nil, // TODO: Fix person2
-            "Person3": nil, // TODO: Fix person3
-            "Person4": nil, // TODO: Fix person4
-            "Person5": nil, // TODO: Fix person5
-            "Person6": nil, // TODO: Fix person6
+            "Person1": nil,  // Computed property - cannot use KeyPath
+            "Person2": nil,  // Computed property - cannot use KeyPath
+            "Person3": nil,  // Computed property - cannot use KeyPath
+            "Person4": nil,  // Computed property - cannot use KeyPath
+            "Person5": nil,  // Computed property - cannot use KeyPath
+            "Person6": nil,  // Computed property - cannot use KeyPath
             "FlightReview": \Flight.flightReview,
             "Checkride": \Flight.checkride,
             "IPC": \Flight.IPC,
@@ -137,6 +139,11 @@ package struct Flight {
 
     package private(set) var remarks: String?
 
+    // Additional fields for ForeFlight export
+    package private(set) var PICUSTime = 0.0  // PICUS time (treated as PIC for ForeFlight)
+    package private(set) var multiPilotTime = 0.0  // Multi-pilot time for multi-engine aircraft
+    package private(set) var examinerTime = 0.0  // Time when examiner was present
+
     var dateFormatted: DateOnly { .init(date) }
     var outFormatted: TimeOnly? {
         guard let out else { return nil }
@@ -163,14 +170,14 @@ package struct Flight {
         return .init(offDuty)
     }
 
-    var approach1: Approach? { approaches.count > 0 ? approaches[0] : nil }
+    var approach1: Approach? { !approaches.isEmpty ? approaches[0] : nil }
     var approach2: Approach? { approaches.count > 1 ? approaches[1] : nil }
     var approach3: Approach? { approaches.count > 2 ? approaches[2] : nil }
     var approach4: Approach? { approaches.count > 3 ? approaches[3] : nil }
     var approach5: Approach? { approaches.count > 4 ? approaches[4] : nil }
     var approach6: Approach? { approaches.count > 5 ? approaches[5] : nil }
 
-    var person1: Member? { people.count > 0 ? people[0] : nil }
+    var person1: Member? { !people.isEmpty ? people[0] : nil }
     var person2: Member? { people.count > 1 ? people[1] : nil }
     var person3: Member? { people.count > 2 ? people[2] : nil }
     var person4: Member? { people.count > 3 ? people[3] : nil }
@@ -220,6 +227,9 @@ package struct Flight {
                  IPC: Bool = false,
                  NVGProficiency: Bool = false,
                  recurrent: Bool = false,
+                 PICUSTime: Double = 0.0,
+                 multiPilotTime: Double = 0.0,
+                 examinerTime: Double = 0.0,
                  remarks: String? = nil) {
         self.date = date
         self.aircraftID = aircraftID
@@ -264,6 +274,9 @@ package struct Flight {
         self.IPC = IPC
         self.NVGProficiency = NVGProficiency
         self.recurrent = recurrent
+        self.PICUSTime = PICUSTime
+        self.multiPilotTime = multiPilotTime
+        self.examinerTime = examinerTime
         self.remarks = remarks
     }
 
