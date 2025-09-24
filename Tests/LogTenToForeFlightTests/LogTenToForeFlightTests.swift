@@ -1,5 +1,6 @@
-@testable import libLogTenToForeFlight
 import XCTest
+
+@testable import libLogTenToForeFlight
 
 final class LogTenToForeFlightTests: XCTestCase {
 }

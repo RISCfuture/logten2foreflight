@@ -1,20 +1,20 @@
 package struct Place: IdentifiableRecord {
 
-    // MARK: Properties
+  // MARK: Properties
 
-    package let identifier: String
-    package var id: String { identifier }
-    package let ICAO: String?
+  package let identifier: String
+  package var id: String { identifier }
+  package let ICAO: String?
 
-    // MARK: Computed properties
+  // MARK: Computed properties
 
-    package var ICAO_or_LID: String { ICAO ?? identifier }
+  package var ICAO_or_LID: String { ICAO ?? identifier }
 
-    // MARK: Initializers
+  // MARK: Initializers
 
-    init?(place: CNPlace?) {
-        guard let place else { return nil }
-        identifier = place.place_identifier
-        ICAO = place.place_icaoid
-    }
+  init?(place: CNPlace?) {
+    guard let place else { return nil }
+    identifier = place.place_identifier
+    ICAO = place.place_icaoid
+  }
 }

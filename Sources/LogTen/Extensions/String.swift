@@ -1,3 +1,3 @@
 extension String {
-    var isPresent: Bool { !isEmpty }
+  var isPresent: Bool { !isEmpty }
 }
