@@ -82,7 +82,8 @@ final class CNFlight: NSManagedObject {
     let request = NSFetchRequest<CNFlight>(entityName: "Flight")
     request.includesSubentities = true
     request.sortDescriptors = [
-      .init(keyPath: \Self.flight_flightDate, ascending: true)
+      // swiftlint:disable:next prefer_self_in_static_references
+      .init(keyPath: \CNFlight.flight_flightDate, ascending: true)
     ]
     return request
   }

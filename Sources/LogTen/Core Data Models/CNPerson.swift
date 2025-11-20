@@ -16,7 +16,8 @@ final class CNPerson: NSManagedObject {
   static func fetchRequest() -> NSFetchRequest<CNPerson> {
     let request = NSFetchRequest<CNPerson>(entityName: "Person")
     request.sortDescriptors = [
-      .init(keyPath: \Self.person_name, ascending: true)
+      // swiftlint:disable:next prefer_self_in_static_references
+      .init(keyPath: \CNPerson.person_name, ascending: true)
     ]
     return request
   }
