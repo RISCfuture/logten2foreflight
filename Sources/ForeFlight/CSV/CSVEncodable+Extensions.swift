@@ -141,7 +141,8 @@ extension Flight.Member: CSVCodable {
 }
 
 // Custom Double formatting for hours - max 0.1 precision
-extension Double: CSVCodable {
+// swiftlint:disable missing_docs
+extension Double {
   public var csvString: String {
     if self == 0 {
       return "0"
@@ -163,6 +164,7 @@ extension Double: CSVCodable {
     self = value
   }
 }
+// swiftlint:enable missing_docs
 
 extension Flight.ApproachType: CSVEncodable {
   package var csvString: String { rawValue }
