@@ -16,7 +16,7 @@ extension Error: LocalizedError {
     switch self {
       case .couldntCreateStore(let path):
         return String(localized: "Couldn’t create Core Data store for “\(path.lastPathComponent)”")
-      case .missingProperty(let property, let model):
+      case let .missingProperty(property, model):
         return String(localized: "\(model) must have a property named “\(property)”")
       case .unsupportedCategory(let category):
         return String(
@@ -32,7 +32,7 @@ extension Error: LocalizedError {
         return String(
           localized: "LogTen Pro engine type “\(type.rawValue)” is not supported by ForeFlight"
         )
-      case .invalidClass(let `class`, let category):
+      case let .invalidClass(`class`, category):
         return String(
           localized:
             "“\(`class`.rawValue)” is not a valid aircraft class for category “\(category.rawValue)”"

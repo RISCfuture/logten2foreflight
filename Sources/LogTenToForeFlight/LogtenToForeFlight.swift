@@ -51,7 +51,8 @@ struct LogtenToForeFlight: AsyncParsableCommand {
     let LTPLogbook = try await LogTen.Reader(
       storeURL: logtenFile,
       modelURL: logtenManagedObjectModel
-    ).read()
+    )
+    .read()
     let FFLogbook = try await Converter(logbook: LTPLogbook).convert()
     try await Writer(logbook: FFLogbook).write(to: foreflightFile)
   }
