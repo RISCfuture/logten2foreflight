@@ -1,13 +1,41 @@
 import Foundation
 
+/// Errors that can occur when reading or processing LogTen Pro data.
 package enum Error: Swift.Error {
+  /// The Core Data store could not be created from the managed object model.
+  /// - Parameter path: The URL to the managed object model that failed to load.
   case couldntCreateStore(path: URL)
+
+  /// A required property is missing from a Core Data record.
+  /// - Parameters:
+  ///   - property: The name of the missing property.
+  ///   - model: The name of the Core Data entity.
   case missingProperty(_ property: String, model: String)
+
+  /// The aircraft category is not supported by ForeFlight.
+  /// - Parameter category: The unsupported LogTen Pro category.
   case unsupportedCategory(_ category: AircraftType.Category)
+
+  /// The aircraft class is not supported by ForeFlight.
+  /// - Parameter class: The unsupported LogTen Pro class.
   case unsupportedClass(_ `class`: AircraftType.Class)
+
+  /// The engine type is not supported by ForeFlight.
+  /// - Parameter type: The unsupported LogTen Pro engine type.
   case unsupportedEngineType(_ type: AircraftType.EngineType)
+
+  /// The aircraft class is not valid for the specified category.
+  /// - Parameters:
+  ///   - class: The invalid class.
+  ///   - forCategory: The category that doesn't support this class.
   case invalidClass(_ `class`: AircraftType.Class, forCategory: AircraftType.Category)
+
+  /// The aircraft type requires a class but none is specified.
+  /// - Parameter type: The type code of the aircraft missing a class.
   case missingClass(type: String)
+
+  /// The simulator type requires a Sim Type custom field but none is specified.
+  /// - Parameter type: The type code of the simulator missing type information.
   case missingSimulatorType(type: String)
 }
 

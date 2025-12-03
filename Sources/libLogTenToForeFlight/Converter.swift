@@ -4,25 +4,54 @@ import LogTen
 import Logging
 
 /// Converts a LogTen Pro logbook to a ForeFlight logbook.
+///
+/// The `Converter` class transforms ``LogTen/Logbook`` data into
+/// ``ForeFlight/Logbook`` format, handling the mapping of aircraft types,
+/// crew roles, approach types, and other fields between the two systems.
+///
+/// ## Usage
+///
+/// ```swift
+/// import LogTen
+/// import libLogTenToForeFlight
+///
+/// let logtenLogbook = try await LogTen.Reader(storeURL: url, modelURL: modelURL).read()
+/// let converter = Converter(logbook: logtenLogbook)
+/// let foreflightLogbook = try await converter.convert()
+/// ```
+///
+/// ## Conversion Logic
+///
+/// The converter handles several mapping complexities:
+///
+/// - **Aircraft Categories:** Maps LogTen categories (including simulator types)
+///   to ForeFlight's category system
+/// - **Engine Types:** Handles special cases like radial and diesel engines
+/// - **Approach Types:** Converts LogTen's extensive approach types to
+///   ForeFlight's smaller set
+/// - **Crew Roles:** Assigns each person a single role based on priority order
 public class Converter {
   private static let logger = Logger(label: "codes.tim.LogTenToForeFlight.Converter")
 
   let LTPLogbook: LogTen.Logbook
 
-  /**
-   Creates an instance.
-  
-   - Parameter logbook: The LogTen Pro logbook.
-   */
+  /// Creates a converter for the specified LogTen Pro logbook.
+  ///
+  /// - Parameter logbook: The LogTen Pro logbook to convert.
   public init(logbook: LogTen.Logbook) {
     LTPLogbook = logbook
   }
 
-  /**
-   Converts the logbook to ForeFlight format.
-  
-   - Returns: The ForeFlight logbook.
-   */
+  /// Converts the logbook to ForeFlight format.
+  ///
+  /// This method iterates through all people, aircraft, and flights in the
+  /// LogTen logbook and converts each to the corresponding ForeFlight format.
+  /// Records are sorted for consistent output: people by name, aircraft by
+  /// tail number, and flights by date.
+  ///
+  /// - Returns: A new ``ForeFlight/Logbook`` containing all converted records.
+  /// - Throws: ``LogTen/Error`` if aircraft have unsupported categories,
+  ///   missing classes, or other configuration issues.
   public func convert() async throws -> ForeFlight.Logbook {
     let FFLogbook = ForeFlight.Logbook()
 

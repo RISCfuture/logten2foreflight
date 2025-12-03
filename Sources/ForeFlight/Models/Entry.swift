@@ -1,17 +1,34 @@
 import Foundation
 
+/// A wrapper for date-only values in CSV output.
+///
+/// Used to format dates without time components for ForeFlight CSV export.
 package struct DateOnly {
+  /// The underlying date value.
   package var date: Date
 
+  /// Creates a date-only wrapper.
+  /// - Parameter date: The date to wrap.
   package init(_ date: Date) { self.date = date }
 }
 
+/// A wrapper for time-only values in CSV output.
+///
+/// Used to format times without date components for ForeFlight CSV export.
 package struct TimeOnly {
+  /// The underlying date value containing the time.
   package var date: Date
 
+  /// Creates a time-only wrapper.
+  /// - Parameter date: The date containing the time to wrap.
   package init(_ date: Date) { self.date = date }
 }
 
+/// A single flight entry in ForeFlight's logbook format.
+///
+/// A `Flight` contains all information about a single flight in the format
+/// expected by ForeFlight's CSV import. This includes timing, approaches,
+/// crew members, and various flight attributes.
 package struct Flight {
   static var fieldMapping: [String: PartialKeyPath<Self>?] {
     [
@@ -282,13 +299,20 @@ package struct Flight {
     self.remarks = remarks
   }
 
+  /// An instrument approach in ForeFlight format.
   package struct Approach {
+    /// The number of approaches of this type.
     package private(set) var count: UInt
+    /// The type of approach.
     package private(set) var type: ApproachType
+    /// The runway identifier.
     package private(set) var runway: String?
+    /// The airport identifier.
     package private(set) var airport: String
+    /// Additional comments about the approach.
     package private(set) var comments: String?
 
+    /// Creates an approach record.
     package init(
       count: UInt,
       type: Flight.ApproachType,
@@ -304,47 +328,81 @@ package struct Flight {
     }
   }
 
+  /// Types of instrument approaches supported by ForeFlight.
   package enum ApproachType: String {
+    /// Airport surveillance radar / surveillance radar approach.
     case ASR_SRA = "ASR/SRA"
+    /// Ground controlled approach.
     case GCA
+    /// GBAS landing system.
     case GLS
+    /// Instrument landing system.
     case ILS
+    /// ILS Category II approach.
     case ILS_CAT2 = "ILS CAT II"
+    /// ILS Category III approach.
     case ILS_CAT3 = "ILS CAT III"
+    /// Localizer type directional aid.
     case LDA
+    /// Localizer approach.
     case LOC
+    /// Localizer back course.
     case LOC_BC = "LOC BC"
+    /// Microwave landing system.
     case MLS
+    /// Non-directional beacon approach.
     case NDB
+    /// Precision approach radar.
     case PAR
+    /// RNAV (GPS) approach.
     case RNAV_GPS = "RNAV (GPS)"
+    /// RNAV (RNP) approach.
     case RNAV_RNP = "RNAV (RNP)"
+    /// Simplified directional facility.
     case SDF
+    /// Tactical air navigation approach.
     case TACAN
+    /// VOR approach.
     case VOR
   }
 
+  /// A crew member or passenger on a flight.
   package struct Member {
+    /// The person.
     package private(set) var person: Person
+    /// The person's role on this flight.
     package private(set) var role: Role
 
+    /// Creates a crew member record.
     package init(person: Person, role: Flight.Role) {
       self.person = person
       self.role = role
     }
   }
 
+  /// Crew roles supported by ForeFlight.
   package enum Role: String {
+    /// Pilot in command.
     case PIC
+    /// Second in command.
     case SIC
+    /// Flight instructor.
     case instructor = "Instructor"
+    /// Student pilot.
     case student = "Student"
+    /// Safety pilot.
     case safetyPilot = "Safety Pilot"
+    /// Examiner (checkride).
     case examiner = "Examiner"
+    /// Passenger.
     case passenger = "Passenger"
+    /// Flight attendant.
     case flightAttendant = "Flight Attendant"
+    /// Flight engineer.
     case flightEngineer = "Flight Engineer"
+    /// First officer.
     case firstOfficer = "First Officer"
+    /// Second officer.
     case secondOfficer = "Second Officer"
   }
 }

@@ -1,0 +1,129 @@
+digraph Architecture {
+    // Graph settings for modern appearance
+    graph [
+        rankdir=TB
+        bgcolor="transparent"
+        fontname="SF Pro Display, Helvetica Neue, Arial"
+        fontsize=14
+        splines=spline
+        nodesep=0.8
+        ranksep=1.0
+        pad=0.5
+    ]
+
+    node [
+        fontname="SF Pro Display, Helvetica Neue, Arial"
+        fontsize=12
+        shape=box
+        style="rounded,filled"
+        penwidth=1.5
+        margin="0.3,0.15"
+    ]
+
+    edge [
+        fontname="SF Pro Display, Helvetica Neue, Arial"
+        fontsize=10
+        penwidth=1.5
+        arrowsize=0.8
+    ]
+
+    // Subgraph for CLI layer
+    subgraph cluster_cli {
+        label="Command Line Interface"
+        labeljust=l
+        style="rounded,dashed"
+        color="#6B7280"
+        fontcolor="#374151"
+        bgcolor="#F9FAFB"
+
+        cli [
+            label="LogTenToForeFlight\n(Executable)"
+            fillcolor="#DBEAFE"
+            color="#3B82F6"
+            fontcolor="#1E40AF"
+        ]
+    }
+
+    // Subgraph for library layer
+    subgraph cluster_lib {
+        label="Public Library"
+        labeljust=l
+        style="rounded,dashed"
+        color="#6B7280"
+        fontcolor="#374151"
+        bgcolor="#F9FAFB"
+
+        converter [
+            label="Converter\n(libLogTenToForeFlight)"
+            fillcolor="#D1FAE5"
+            color="#10B981"
+            fontcolor="#065F46"
+        ]
+    }
+
+    // Subgraph for internal modules
+    subgraph cluster_internal {
+        label="Internal Modules"
+        labeljust=l
+        style="rounded,dashed"
+        color="#6B7280"
+        fontcolor="#374151"
+        bgcolor="#F9FAFB"
+
+        // Input side
+        subgraph cluster_input {
+            label="Input"
+            style="rounded"
+            color="#9CA3AF"
+            bgcolor="#FEF3C7"
+
+            logten [
+                label="LogTen\nReader + Models"
+                fillcolor="#FDE68A"
+                color="#F59E0B"
+                fontcolor="#92400E"
+            ]
+        }
+
+        // Output side
+        subgraph cluster_output {
+            label="Output"
+            style="rounded"
+            color="#9CA3AF"
+            bgcolor="#FCE7F3"
+
+            foreflight [
+                label="ForeFlight\nModels + Writer"
+                fillcolor="#FBCFE8"
+                color="#EC4899"
+                fontcolor="#9D174D"
+            ]
+        }
+    }
+
+    // External data sources
+    coredata [
+        label="LogTen Pro\nCore Data Store"
+        shape=cylinder
+        fillcolor="#E5E7EB"
+        color="#6B7280"
+        fontcolor="#374151"
+    ]
+
+    csvfile [
+        label="ForeFlight\nCSV File"
+        shape=note
+        fillcolor="#E5E7EB"
+        color="#6B7280"
+        fontcolor="#374151"
+    ]
+
+    // Edges with labels
+    coredata -> logten [xlabel="read" color="#F59E0B" fontcolor="#92400E"]
+    cli -> converter [xlabel="orchestrates" color="#3B82F6" fontcolor="#1E40AF"]
+    converter -> logten [xlabel="uses" color="#10B981" fontcolor="#065F46"]
+    converter -> foreflight [xlabel="uses" color="#10B981" fontcolor="#065F46"]
+    logten -> converter [xlabel="Logbook" color="#F59E0B" fontcolor="#92400E" style=dashed]
+    converter -> foreflight [xlabel="Logbook" color="#EC4899" fontcolor="#9D174D" style=dashed constraint=false]
+    foreflight -> csvfile [xlabel="write" color="#EC4899" fontcolor="#9D174D"]
+}
