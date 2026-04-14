@@ -3,7 +3,7 @@ import Foundation
 /// A LogTen Pro logbook containing flights, aircraft, and people.
 ///
 /// The `Logbook` actor provides thread-safe access to all records loaded from
-/// a LogTen Pro Core Data store. Use ``Reader`` to create a logbook instance.
+/// a LogTen Pro Core Data store. Use `Reader` to create a logbook instance.
 public actor Logbook {
 
   // MARK: Data

@@ -3,7 +3,7 @@ import Foundation
 /// A ForeFlight logbook containing flights, aircraft, and people.
 ///
 /// The `Logbook` actor provides thread-safe storage for ForeFlight logbook data.
-/// Use the ``libLogTenToForeFlight/Converter`` to create a logbook from LogTen Pro
+/// Use the `libLogTenToForeFlight.Converter` to create a logbook from LogTen Pro
 /// data, or populate it directly for testing.
 public actor Logbook {
   /// All flight entries in the logbook.

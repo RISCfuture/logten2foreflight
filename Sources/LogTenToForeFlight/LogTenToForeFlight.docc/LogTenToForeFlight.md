@@ -1,10 +1,6 @@
-# ``LogTenToForeFlight``
+# LogTen to ForeFlight
 
 Convert LogTen Pro logbooks to ForeFlight CSV format.
-
-@Metadata {
-    @DisplayName("LogTen to ForeFlight")
-}
 
 ## Overview
 
