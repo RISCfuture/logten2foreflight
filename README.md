@@ -16,7 +16,7 @@ project, run `swift build` to install dependencies and create the executable.
 Run `logten-to-foreflight --help` for usage instructions:
 
 ```
-USAGE: logten-to-foreflight [--logten-file <logten-file>] [--logten-managed-object-model <logten-managed-object-model>] <foreflight-file> [--verbose]
+USAGE: logten-to-foreflight [--logten-file <logten-file>] [--logten-managed-object-model <logten-managed-object-model>] [--default-regulations <default-regulations>] <foreflight-file> [--verbose]
 
 ARGUMENTS:
   <foreflight-file>       The ForeFlight logbook.csv file to create.
@@ -26,6 +26,9 @@ OPTIONS:
                           The LogTenCoreDataStore.sql file containing the logbook entries.
   --logten-managed-object-model <logten-managed-object-model>
                           The location of the LogTen Pro managed object model file.
+  --default-regulations <default-regulations>
+                          Regulations regime to use when the departure airport's
+                          ICAO doesn't start with K or E. (values: faa, easa; default: faa)
   --verbose               Include extra information in the output.
   -h, --help              Show help information.
 ```
@@ -57,6 +60,31 @@ take you 95% of the way there. In particular:
 - LogTen Pro does not have a "US PIC" field. This is kept equal to PIC.
 - Examiner time will be credited for flights where the Examiner field is set to 
   your crew profile (see "Crew and passengers" below).
+- Each flight is classified into one regulatory regime. Flights whose
+  departure airport ICAO starts with `K` are treated as FAA; flights
+  starting with `E` are EASA. Anything else falls through to
+  `--default-regulations` (default `faa`). FAA-side boolean columns
+  (Flight Review, IPC, Checkride, FAA 61.58, NVG Proficiency) emit only
+  on FAA flights; EASA columns (Initial Check, Proficiency Check, IR
+  Proficiency Check, Refresher Training) only on EASA flights.
+- The EASA boolean columns reuse LogTen fields:
+  `Checkride → Initial Check (EASA)`,
+  `FAR 61.58 → Proficiency Check (EASA)`,
+  `IPC → IR Proficiency Check (EASA)`. For
+  `Refresher Training (EASA)`, add a Flight "Custom Notes" field titled
+  "Refresher Training" — any non-empty value marks the flight as
+  refresher training. If the field isn't set up, the column stays blank.
+- Touch-and-go landings are computed as
+  `(total day landings − day full-stop landings)` and similar for night.
+- To populate the "… Towered" takeoff/landing columns, add a Place custom
+  attribute titled "Towered" and set a non-empty value (e.g. "Yes") for
+  each airport that has a control tower. Values of `0`, `no`, `n`, or
+  `false` count as non-towered. If the custom attribute isn't set up, the
+  six towered columns stay blank. Takeoffs use the departure airport's
+  tower status; all landings (full-stop and touch-and-go, day and night)
+  use the destination airport's status, which can misclassify
+  touch-and-goes made at intermediate waypoints — split multi-leg flights
+  in LogTen if you need precise attribution.
 
 ### Aircraft and aircraft types
 
@@ -84,6 +112,29 @@ take you 95% of the way there. In particular:
 - ForeFlight supports land and sea variants for Powered Parachute and
   Weight-Shift-Control aircraft, whereas LogTen Pro does not. These aircraft are
   assumed to be land variants.
+- LogTen's native `Complex` and `High Performance` Aircraft flags describe
+  each aircraft under whichever regulatory regime you pass to
+  `--default-regulations`. The opposite regime's `complexAircraft (EASA)` /
+  `sphp (EASA)` or `complexAircraft` / `highPerformance` column stays blank
+  unless you add an override custom attribute titled `"FAA Complex"`,
+  `"EASA Complex"`, `"FAA High Performance"`, or `"EASA SPHP"` to your
+  Aircraft and set it per airframe. (FAA and EASA use materially different
+  definitions — FAA complex is retractable gear + constant-speed prop +
+  flaps; EASA complex is MTOW > 5700 kg or > 19 seats. EASA SPHP is a
+  type-rating classification, not FAA's ">200 HP" test. Automatic
+  cross-regime derivation would be wrong more often than right.)
+- `equipType (EASA)` is derived from LogTen's simulator type
+  (FFS/FTD/aircraft map 1:1; BATD and AATD emit blank). Override by adding
+  an Aircraft Type custom attribute titled `"EASA Equip Type"`.
+- `Category/Class (EASA)` is derived from LogTen's category, class, and
+  engine type. A `Glider` with a powered engine type maps to
+  `touring_motor_glider`; non-powered (or missing engine) maps to
+  `sailplane`. `multiPilot (EASA)` mirrors the aircraft type's Multi-Pilot
+  flag.
+- To mark an aircraft type as an EASA ultralight, rename one of LogTen's
+  empty category slots to "Ultralight" and assign those types to it. The
+  converter will emit `ultralight` for `Category/Class (EASA)` and leave
+  `Category/Class` blank for those aircraft.
 - Category, class, and engine type are matched by the display title you
   see in LogTen (not by slot index), so renaming the defaults or adding
   new ones is safe.

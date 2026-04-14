@@ -5,6 +5,16 @@ import LogTen
 import Logging
 import libLogTenToForeFlight
 
+extension ForeFlight.Regulations: ExpressibleByArgument {
+  public init?(argument: String) {
+    switch argument.lowercased() {
+      case "faa": self = .FAA
+      case "easa": self = .EASA
+      default: return nil
+    }
+  }
+}
+
 /// Command-line tool that converts LogTen Pro logbooks to ForeFlight CSV format.
 ///
 /// This tool reads a LogTen Pro logbook from its Core Data store and produces
@@ -24,13 +34,21 @@ import libLogTenToForeFlight
 /// ```
 @main
 struct LogtenToForeFlight: AsyncParsableCommand {
-  private static let logtenDataStorePath =
-    "Library/Group Containers/group.com.coradine.LogTenPro/LogTenProData_6583aa561ec1cc91302449b5/LogTenCoreDataStore.sql"
+  private static let logtenGroupContainerPath =
+    "Library/Group Containers/group.com.coradine.LogTenPro"
+  private static let logtenDataStoreFilename = "LogTenCoreDataStore.sql"
   private static let managedObjectModelPath = "LogTen.app/Contents/Resources/CNLogBookDocument.momd"
 
   private static var logtenDataStoreURL: URL {
     let homeDir = FileManager.default.homeDirectoryForCurrentUser
-    return homeDir.appendingPathComponent(logtenDataStorePath)
+    let groupContainer = homeDir.appendingPathComponent(logtenGroupContainerPath)
+    let dataDirectory =
+      (try? FileManager.default.contentsOfDirectory(
+        at: groupContainer,
+        includingPropertiesForKeys: nil
+      ))?.first { $0.lastPathComponent.hasPrefix("LogTenProData_") }
+      ?? groupContainer.appendingPathComponent("LogTenProData")
+    return dataDirectory.appendingPathComponent(logtenDataStoreFilename)
   }
 
   private static var managedObjectModelURL: URL {
@@ -61,6 +79,15 @@ struct LogtenToForeFlight: AsyncParsableCommand {
   )
   var foreflightFile: URL
 
+  /// Regulatory regime to apply when a flight's departure airport ICAO
+  /// doesn't start with K (FAA) or E (EASA).
+  @Option(
+    name: .customLong("default-regulations"),
+    help:
+      "Regulations regime to use when the departure airport's ICAO doesn't start with K or E. (values: faa, easa)"
+  )
+  var defaultRegulations: ForeFlight.Regulations = .FAA
+
   /// Enable verbose logging output.
   @Flag(help: "Include extra information in the output.")
   var verbose = false
@@ -80,7 +107,10 @@ struct LogtenToForeFlight: AsyncParsableCommand {
       modelURL: logtenManagedObjectModel
     )
     .read()
-    let FFLogbook = try await Converter(logbook: LTPLogbook).convert()
+    let FFLogbook = try await Converter(
+      logbook: LTPLogbook,
+      defaultRegulations: defaultRegulations
+    ).convert()
     try await Writer(logbook: FFLogbook).write(to: foreflightFile)
   }
 }

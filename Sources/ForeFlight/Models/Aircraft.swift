@@ -20,7 +20,10 @@ package struct Aircraft {
       "Complex": \Self.complex,
       "HighPerformance": \Self.highPerformance,
       "Pressurized": \Self.pressurized,
-      "TAA": \Self.technicallyAdvanced
+      "TAA": \Self.technicallyAdvanced,
+      "ComplexEASA": \Self.complexEASA,
+      "SphpEASA": \Self.sphpEASA,
+      "EquipTypeEASAOverride": \Self.equipTypeEASAOverride
     ]
   }
 
@@ -34,10 +37,23 @@ package struct Aircraft {
   package private(set) var `class`: Class?
   package private(set) var gearType: GearType?
   package private(set) var engineType: EngineType?
-  package private(set) var complex: Bool
-  package private(set) var highPerformance: Bool
+  package private(set) var complex: Bool?
+  package private(set) var highPerformance: Bool?
   package private(set) var pressurized: Bool
   package private(set) var technicallyAdvanced: Bool
+  package private(set) var multiPilot: Bool
+
+  /// EASA complex: populated when the Converter resolves a value (either
+  /// native LogTen when `--default-regulations=easa`, or via an EASA Complex
+  /// override). `nil` ⇒ blank column.
+  package private(set) var complexEASA: Bool?
+
+  /// EASA SPHP: populated symmetrically to `complexEASA`. `nil` ⇒ blank.
+  package private(set) var sphpEASA: Bool?
+
+  /// Optional user override for the EASA equipType column. When non-nil,
+  /// emitted verbatim instead of the derived value.
+  package private(set) var equipTypeEASAOverride: String?
 
   package init(
     tailNumber: String,
@@ -50,10 +66,14 @@ package struct Aircraft {
     class: Class? = nil,
     gearType: GearType? = nil,
     engineType: EngineType? = nil,
-    complex: Bool = false,
-    highPerformance: Bool = false,
+    complex: Bool? = false,
+    highPerformance: Bool? = false,
     pressurized: Bool = false,
-    technicallyAdvanced: Bool = false
+    technicallyAdvanced: Bool = false,
+    multiPilot: Bool = false,
+    complexEASA: Bool? = nil,
+    sphpEASA: Bool? = nil,
+    equipTypeEASAOverride: String? = nil
   ) {
     self.tailNumber = tailNumber
     self.simulatorType = simulatorType
@@ -69,6 +89,10 @@ package struct Aircraft {
     self.highPerformance = highPerformance
     self.pressurized = pressurized
     self.technicallyAdvanced = technicallyAdvanced
+    self.multiPilot = multiPilot
+    self.complexEASA = complexEASA
+    self.sphpEASA = sphpEASA
+    self.equipTypeEASAOverride = equipTypeEASAOverride
   }
 
   /// Landing gear types supported by ForeFlight.
@@ -111,6 +135,15 @@ package struct Aircraft {
     case turboprop = "Turboprop"
     /// Turboshaft engine (helicopters).
     case turboshaft = "Turboshaft"
+
+    /// Whether this engine is a turbine (vs. piston). Used to split EASA
+    /// Category/Class into piston and turbine variants.
+    package var isTurbine: Bool {
+      switch self {
+        case .turbofan, .turbojet, .turboprop, .turboshaft: return true
+        default: return false
+      }
+    }
   }
 
   /// Equipment types for aircraft and simulators.
@@ -125,6 +158,17 @@ package struct Aircraft {
     case AATD = "aatd"
     /// Basic aviation training device.
     case BATD = "batd"
+
+    /// The EASA equipType string for this equipment, or empty when there's
+    /// no direct EASA equivalent (BATD, AATD).
+    package var easaEquipType: String {
+      switch self {
+        case .aircraft: return "Aircraft"
+        case .FFS: return "FFS"
+        case .FTD: return "FTD"
+        case .BATD, .AATD: return ""
+      }
+    }
   }
 
   /// FAA aircraft categories supported by ForeFlight.
@@ -145,6 +189,8 @@ package struct Aircraft {
     case weightShiftControl = "Weight-Shift-Control"
     /// Simulator or training device.
     case simulator = "Simulator"
+    /// EASA ultralight. No FAA equivalent.
+    case ultralight = "Ultralight"
   }
 
   /// FAA aircraft classes supported by ForeFlight.

@@ -27,11 +27,12 @@ package struct FlightCSVRow {
   @Field package var nvg: Double
   @Field package var nvgOps: UInt
   @Field package var distance: Double?
-  @Field package var dayTakeoffs: UInt
-  @Field package var dayLandingsFullStop: UInt
-  @Field package var nightTakeoffs: UInt
-  @Field package var nightLandingsFullStop: UInt
-  @Field package var allLandings: UInt
+  @Field package var takeoffDay: UInt
+  @Field package var takeoffNight: UInt
+  @Field package var landingFullStopDay: UInt
+  @Field package var landingFullStopNight: UInt
+  @Field package var landingTouchAndGoDay: UInt
+  @Field package var landingTouchAndGoNight: UInt
   @Field package var actualInstrument: Double
   @Field package var simulatedInstrument: Double
   @Field package var groundTraining: Double
@@ -59,11 +60,11 @@ package struct FlightCSVRow {
   @Field package var person5: Flight.Member?
   @Field package var person6: Flight.Member?
   @Field package var pilotComments: String?
-  @Field package var flightReview: CSVBool
-  @Field package var ipc: CSVBool
-  @Field package var checkride: CSVBool
-  @Field package var faa6158: CSVBool
-  @Field package var nvgProficiency: CSVBool
+  @Field package var flightReview: CSVBool?
+  @Field package var ipc: CSVBool?
+  @Field package var checkride: CSVBool?
+  @Field package var faa6158: CSVBool?
+  @Field package var nvgProficiency: CSVBool?
   @Field package var textCustomFieldName: String?
   @Field package var numericCustomFieldName: Double?
   @Field package var hoursCustomFieldName: Double?
@@ -71,8 +72,21 @@ package struct FlightCSVRow {
   @Field package var dateCustomFieldName: DateOnly?
   @Field package var dateTimeCustomFieldName: DateOnly?
   @Field package var toggleCustomFieldName: CSVBool?
+  @Field package var takeoffDayTowered: UInt?
+  @Field package var takeoffNightTowered: UInt?
+  @Field package var landingFullStopDayTowered: UInt?
+  @Field package var landingTouchAndGoDayTowered: UInt?
+  @Field package var landingFullStopNightTowered: UInt?
+  @Field package var landingTouchAndGoNightTowered: UInt?
+  @Field package var initialCheckEASA: CSVBool?
+  @Field package var proficiencyCheckEASA: CSVBool?
+  @Field package var irProficiencyCheckEASA: CSVBool?
+  @Field package var refresherTrainingEASA: CSVBool?
 
   package init(from flight: Flight) {
+    let isFAA = flight.regulations == .FAA
+    let isEASA = flight.regulations == .EASA
+
     self.date = flight.dateFormatted
     self.aircraftID = flight.aircraftID
     self.from = flight.from
@@ -97,11 +111,12 @@ package struct FlightCSVRow {
     self.nvg = flight.NVGTime
     self.nvgOps = flight.NVGOps
     self.distance = flight.distance
-    self.dayTakeoffs = flight.takeoffsDay
-    self.dayLandingsFullStop = flight.landingsDayFullStop
-    self.nightTakeoffs = flight.takeoffsNight
-    self.nightLandingsFullStop = flight.landingsNightFullStop
-    self.allLandings = flight.landingsAll
+    self.takeoffDay = flight.takeoffsDay
+    self.takeoffNight = flight.takeoffsNight
+    self.landingFullStopDay = flight.landingsDayFullStop
+    self.landingFullStopNight = flight.landingsNightFullStop
+    self.landingTouchAndGoDay = flight.landingsDayTouchAndGo
+    self.landingTouchAndGoNight = flight.landingsNightTouchAndGo
     self.actualInstrument = flight.actualInstrumentTime
     self.simulatedInstrument = flight.simulatedInstrumentTime
     self.groundTraining = flight.groundTime
@@ -120,8 +135,7 @@ package struct FlightCSVRow {
     self.dualGiven = flight.dualGiven
     self.dualReceived = flight.dualReceived
     self.simulatedFlight = flight.simulatorTime
-    self.groundTraining = flight.groundTime
-    self.instructorName = nil  // These fields are not in the Flight model
+    self.instructorName = nil  // Not in the LogTen Flight model
     self.instructorComments = nil
     self.person1 = flight.person1
     self.person2 = flight.person2
@@ -129,18 +143,31 @@ package struct FlightCSVRow {
     self.person4 = flight.person4
     self.person5 = flight.person5
     self.person6 = flight.person6
-    self.flightReview = CSVBool(flight.flightReview)
-    self.checkride = CSVBool(flight.checkride)
-    self.ipc = CSVBool(flight.IPC)
-    self.nvgProficiency = CSVBool(flight.NVGProficiency)
-    self.faa6158 = CSVBool(flight.recurrent)
-    self.textCustomFieldName = nil  // Custom fields not implemented
+    self.pilotComments = flight.remarks
+    self.flightReview = isFAA ? CSVBool(flight.flightReview) : nil
+    self.ipc = isFAA ? CSVBool(flight.IPC) : nil
+    self.checkride = isFAA ? CSVBool(flight.checkride) : nil
+    self.faa6158 = isFAA ? CSVBool(flight.recurrent) : nil
+    self.nvgProficiency = isFAA ? CSVBool(flight.NVGProficiency) : nil
+    self.textCustomFieldName = nil
     self.numericCustomFieldName = nil
     self.hoursCustomFieldName = nil
     self.counterCustomFieldName = nil
     self.dateCustomFieldName = nil
     self.dateTimeCustomFieldName = nil
     self.toggleCustomFieldName = nil
-    self.pilotComments = flight.remarks
+    self.takeoffDayTowered = flight.takeoffsDayTowered
+    self.takeoffNightTowered = flight.takeoffsNightTowered
+    self.landingFullStopDayTowered = flight.landingsDayFullStopTowered
+    self.landingTouchAndGoDayTowered = flight.landingsDayTouchAndGoTowered
+    self.landingFullStopNightTowered = flight.landingsNightFullStopTowered
+    self.landingTouchAndGoNightTowered = flight.landingsNightTouchAndGoTowered
+    // EASA checkride → Initial Check; proficiencyCheck (FAR 61.58) → Proficiency
+    // Check; IPC → IR Proficiency Check; refresherTraining → Refresher Training.
+    // Emit blank when the flight is FAA-regulated.
+    self.initialCheckEASA = isEASA ? CSVBool(flight.checkride) : nil
+    self.proficiencyCheckEASA = isEASA ? CSVBool(flight.recurrent) : nil
+    self.irProficiencyCheckEASA = isEASA ? CSVBool(flight.IPC) : nil
+    self.refresherTrainingEASA = isEASA ? CSVBool(flight.refresherTraining) : nil
   }
 }

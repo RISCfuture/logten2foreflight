@@ -24,6 +24,13 @@ package struct TimeOnly {
   package init(_ date: Date) { self.date = date }
 }
 
+/// Which regulatory regime (FAA or EASA) applies to a flight. Steers which
+/// of the FAA/EASA parallel boolean columns get populated on export.
+public enum Regulations: String, Sendable {
+  case FAA
+  case EASA
+}
+
 /// A single flight entry in ForeFlight's logbook format.
 ///
 /// A `Flight` contains all information about a single flight in the format
@@ -52,11 +59,12 @@ package struct Flight {
       "NVG": \Self.NVGTime,
       "NVGOps": \Self.NVGOps,
       "Distance": \Self.distance,
-      "DayTakeoffs": \Self.takeoffsDay,
-      "DayLandingsFullStop": \Self.landingsDayFullStop,
-      "NightTakeoffs": \Self.takeoffsNight,
-      "NightLandingsFullStop": \Self.landingsNightFullStop,
-      "AllLandings": \Self.landingsAll,
+      "Takeoff Day": \Self.takeoffsDay,
+      "Landing Full-Stop Day": \Self.landingsDayFullStop,
+      "Landing Touch-and-Go Day": \Self.landingsDayTouchAndGo,
+      "Takeoff Night": \Self.takeoffsNight,
+      "Landing Full-Stop Night": \Self.landingsNightFullStop,
+      "Landing Touch-and-Go Night": \Self.landingsNightTouchAndGo,
       "ActualInstrument": \Self.actualInstrumentTime,
       "SimulatedInstrument": \Self.simulatedInstrumentTime,
       "HobbsStart": \Self.hobbsStart,
@@ -126,9 +134,20 @@ package struct Flight {
 
   package private(set) var takeoffsDay: UInt = 0
   package private(set) var landingsDayFullStop: UInt = 0
+  package private(set) var landingsDayTouchAndGo: UInt = 0
   package private(set) var takeoffsNight: UInt = 0
   package private(set) var landingsNightFullStop: UInt = 0
-  package private(set) var landingsAll: UInt = 0
+  package private(set) var landingsNightTouchAndGo: UInt = 0
+
+  // Optional towered breakdowns. `nil` ⇒ blank column (meaning we don't know
+  // whether the airport was towered, typically because the user hasn't
+  // configured a Place "Towered" custom attribute in LogTen).
+  package private(set) var takeoffsDayTowered: UInt?
+  package private(set) var takeoffsNightTowered: UInt?
+  package private(set) var landingsDayFullStopTowered: UInt?
+  package private(set) var landingsDayTouchAndGoTowered: UInt?
+  package private(set) var landingsNightFullStopTowered: UInt?
+  package private(set) var landingsNightTouchAndGoTowered: UInt?
 
   package private(set) var actualInstrumentTime = 0.0
   package private(set) var simulatedInstrumentTime = 0.0
@@ -153,6 +172,14 @@ package struct Flight {
   package private(set) var IPC = false
   package private(set) var NVGProficiency = false
   package private(set) var recurrent = false
+
+  /// Whether this flight is refresher training under EASA. Only relevant on
+  /// EASA-regulated flights.
+  package private(set) var refresherTraining = false
+
+  /// Which regulatory regime this flight falls under. Determines whether
+  /// FAA-side or EASA-side boolean columns get populated.
+  package private(set) var regulations: Regulations = .FAA
 
   package private(set) var remarks: String?
 
@@ -224,9 +251,16 @@ package struct Flight {
     distance: Double? = nil,
     takeoffsDay: UInt = 0,
     landingsDayFullStop: UInt = 0,
+    landingsDayTouchAndGo: UInt = 0,
     takeoffsNight: UInt = 0,
     landingsNightFullStop: UInt = 0,
-    landingsAll: UInt = 0,
+    landingsNightTouchAndGo: UInt = 0,
+    takeoffsDayTowered: UInt? = nil,
+    takeoffsNightTowered: UInt? = nil,
+    landingsDayFullStopTowered: UInt? = nil,
+    landingsDayTouchAndGoTowered: UInt? = nil,
+    landingsNightFullStopTowered: UInt? = nil,
+    landingsNightTouchAndGoTowered: UInt? = nil,
     actualInstrumentTime: Double = 0.0,
     simulatedInstrumentTime: Double = 0.0,
     hobbsStart: Double? = nil,
@@ -245,6 +279,8 @@ package struct Flight {
     IPC: Bool = false,
     NVGProficiency: Bool = false,
     recurrent: Bool = false,
+    refresherTraining: Bool = false,
+    regulations: Regulations = .FAA,
     PICUSTime: Double = 0.0,
     multiPilotTime: Double = 0.0,
     examinerTime: Double = 0.0,
@@ -272,9 +308,16 @@ package struct Flight {
     self.distance = distance
     self.takeoffsDay = takeoffsDay
     self.landingsDayFullStop = landingsDayFullStop
+    self.landingsDayTouchAndGo = landingsDayTouchAndGo
     self.takeoffsNight = takeoffsNight
     self.landingsNightFullStop = landingsNightFullStop
-    self.landingsAll = landingsAll
+    self.landingsNightTouchAndGo = landingsNightTouchAndGo
+    self.takeoffsDayTowered = takeoffsDayTowered
+    self.takeoffsNightTowered = takeoffsNightTowered
+    self.landingsDayFullStopTowered = landingsDayFullStopTowered
+    self.landingsDayTouchAndGoTowered = landingsDayTouchAndGoTowered
+    self.landingsNightFullStopTowered = landingsNightFullStopTowered
+    self.landingsNightTouchAndGoTowered = landingsNightTouchAndGoTowered
     self.actualInstrumentTime = actualInstrumentTime
     self.simulatedInstrumentTime = simulatedInstrumentTime
     self.hobbsStart = hobbsStart
@@ -293,6 +336,8 @@ package struct Flight {
     self.IPC = IPC
     self.NVGProficiency = NVGProficiency
     self.recurrent = recurrent
+    self.refresherTraining = refresherTraining
+    self.regulations = regulations
     self.PICUSTime = PICUSTime
     self.multiPilotTime = multiPilotTime
     self.examinerTime = examinerTime

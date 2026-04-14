@@ -35,7 +35,8 @@ package class Writer {
     let rows = try await template.buildRows()
 
     // Determine the total number of columns (flights table has the most)
-    let totalColumns = 68  // Based on the ForeFlight template structure
+    let totalColumns = 79  // 69 in the downloaded ForeFlight template + 10 appended
+    // (6 towered + 4 EASA booleans) = 79 cells per row.
 
     for row in rows {
       switch row {

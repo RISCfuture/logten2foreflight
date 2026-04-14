@@ -30,16 +30,24 @@ import Logging
 /// - **Approach Types:** Converts LogTen's extensive approach types to
 ///   ForeFlight's smaller set
 /// - **Crew Roles:** Assigns each person a single role based on priority order
+/// - **Regulatory regime:** Classifies each flight as FAA or EASA based on
+///   the departure airport's ICAO prefix; `--default-regulations` applies
+///   when no `K`/`E` prefix is present.
 public class Converter {
   private static let logger = Logger(label: "codes.tim.LogTenToForeFlight.Converter")
 
   let LTPLogbook: LogTen.Logbook
+  let defaultRegulations: ForeFlight.Regulations
 
   /// Creates a converter for the specified LogTen Pro logbook.
   ///
-  /// - Parameter logbook: The LogTen Pro logbook to convert.
-  public init(logbook: LogTen.Logbook) {
+  /// - Parameters:
+  ///   - logbook: The LogTen Pro logbook to convert.
+  ///   - defaultRegulations: Which regulatory regime to apply to flights whose
+  ///     departure airport ICAO doesn't start with `K` or `E`. Defaults to FAA.
+  public init(logbook: LogTen.Logbook, defaultRegulations: ForeFlight.Regulations = .FAA) {
     LTPLogbook = logbook
+    self.defaultRegulations = defaultRegulations
   }
 
   /// Converts the logbook to ForeFlight format.
@@ -79,6 +87,28 @@ public class Converter {
   }
 
   private func convert(aircraft: LogTen.Aircraft) throws -> ForeFlight.Aircraft {
+    // FAA / EASA boolean pairs. LogTen's native aircraft_complex / _highPerformance
+    // represent whichever regime the user runs the converter in. The opposite
+    // regime's column is populated only via an explicit user override custom
+    // attribute, or left blank.
+    let faaComplex: Bool?
+    let easaComplex: Bool?
+    let faaHighPerformance: Bool?
+    let easaSPHP: Bool?
+
+    switch defaultRegulations {
+      case .FAA:
+        faaComplex = aircraft.faaComplexOverride ?? aircraft.complex
+        easaComplex = aircraft.easaComplexOverride
+        faaHighPerformance = aircraft.faaHighPerformanceOverride ?? aircraft.highPerformance
+        easaSPHP = aircraft.easaSPHPOverride
+      case .EASA:
+        easaComplex = aircraft.easaComplexOverride ?? aircraft.complex
+        faaComplex = aircraft.faaComplexOverride
+        easaSPHP = aircraft.easaSPHPOverride ?? aircraft.highPerformance
+        faaHighPerformance = aircraft.faaHighPerformanceOverride
+    }
+
     return .init(
       tailNumber: aircraft.tailNumber,
       simulatorType: simulatorType(for: aircraft.type),
@@ -90,21 +120,54 @@ public class Converter {
       class: try `class`(for: aircraft.type),
       gearType: gearType(for: aircraft),
       engineType: try engineType(for: aircraft),
-      complex: aircraft.complex,
-      highPerformance: aircraft.highPerformance,
+      complex: faaComplex,
+      highPerformance: faaHighPerformance,
       pressurized: aircraft.pressurized,
-      technicallyAdvanced: aircraft.technicallyAdvanced
+      technicallyAdvanced: aircraft.technicallyAdvanced,
+      multiPilot: aircraft.type.multiPilot,
+      complexEASA: easaComplex,
+      sphpEASA: easaSPHP,
+      equipTypeEASAOverride: aircraft.type.easaEquipTypeOverride
     )
   }
 
   private func convert(entry: LogTen.Flight) -> ForeFlight.Flight? {
     guard let aircraft = entry.aircraft else { return nil }
 
+    let regulations = classify(icao: entry.from?.ICAO)
+
     // Use the actual multiPilot field from the aircraft type
     let multiPilotTime = aircraft.type.multiPilot ? entry.totalHours : 0
 
     // Examiner time only counts when the current user is the examiner
     let examinerTime = (entry.examiner?.isMe ?? false) ? entry.totalHours : 0
+
+    // Touch-and-go landings are total day/night minus full-stop variants.
+    let landingsDayTouchAndGo =
+      entry.landingsDay >= entry.landingsDayFullStop
+      ? entry.landingsDay - entry.landingsDayFullStop
+      : 0
+    let landingsNightTouchAndGo =
+      entry.landingsNight >= entry.landingsNightFullStop
+      ? entry.landingsNight - entry.landingsNightFullStop
+      : 0
+
+    // Towered counts: only populate when we have real data.
+    let fromTowered = entry.from?.toweredKnown == true && entry.from?.towered == true
+    let toTowered = entry.to?.toweredKnown == true && entry.to?.towered == true
+
+    let takeoffsDayTowered: UInt? =
+      entry.from?.toweredKnown == true ? (fromTowered ? entry.takeoffsDay : 0) : nil
+    let takeoffsNightTowered: UInt? =
+      entry.from?.toweredKnown == true ? (fromTowered ? entry.takeoffsNight : 0) : nil
+    let landingsDayFullStopTowered: UInt? =
+      entry.to?.toweredKnown == true ? (toTowered ? entry.landingsDayFullStop : 0) : nil
+    let landingsDayTouchAndGoTowered: UInt? =
+      entry.to?.toweredKnown == true ? (toTowered ? landingsDayTouchAndGo : 0) : nil
+    let landingsNightFullStopTowered: UInt? =
+      entry.to?.toweredKnown == true ? (toTowered ? entry.landingsNightFullStop : 0) : nil
+    let landingsNightTouchAndGoTowered: UInt? =
+      entry.to?.toweredKnown == true ? (toTowered ? landingsNightTouchAndGo : 0) : nil
 
     return .init(
       date: entry.date,
@@ -129,9 +192,16 @@ public class Converter {
       distance: entry.distance,
       takeoffsDay: entry.takeoffsDay,
       landingsDayFullStop: entry.landingsDayFullStop,
+      landingsDayTouchAndGo: landingsDayTouchAndGo,
       takeoffsNight: entry.takeoffsNight,
       landingsNightFullStop: entry.landingsNightFullStop,
-      landingsAll: entry.landingsAll,
+      landingsNightTouchAndGo: landingsNightTouchAndGo,
+      takeoffsDayTowered: takeoffsDayTowered,
+      takeoffsNightTowered: takeoffsNightTowered,
+      landingsDayFullStopTowered: landingsDayFullStopTowered,
+      landingsDayTouchAndGoTowered: landingsDayTouchAndGoTowered,
+      landingsNightFullStopTowered: landingsNightFullStopTowered,
+      landingsNightTouchAndGoTowered: landingsNightTouchAndGoTowered,
       actualInstrumentTime: entry.actualInstrumentHours,
       simulatedInstrumentTime: entry.simulatedInstrumentHours,
       hobbsStart: entry.hobbsStart,
@@ -150,11 +220,23 @@ public class Converter {
       IPC: entry.IPC,
       NVGProficiency: false,
       recurrent: entry.proficiencyCheck,
+      refresherTraining: entry.refresherTraining,
+      regulations: regulations,
       PICUSTime: entry.PICHours,  // Treat PICUS as PIC per user request
       multiPilotTime: multiPilotTime,
       examinerTime: examinerTime,
       remarks: entry.remarks
     )
+  }
+
+  /// Classifies a departure ICAO into an FAA/EASA regime. K-prefix ⇒ FAA,
+  /// E-prefix ⇒ EASA; otherwise falls back to `defaultRegulations`.
+  private func classify(icao: String?) -> ForeFlight.Regulations {
+    switch icao?.first {
+      case "K", "k": return .FAA
+      case "E", "e": return .EASA
+      default: return defaultRegulations
+    }
   }
 
   private func simulatorType(for type: LogTen.AircraftType) -> ForeFlight.Aircraft.SimulatorType {
@@ -179,6 +261,7 @@ public class Converter {
       case .simulator: return .simulator
       case .PC_ATD: return .simulator
       case .trainingDevice: return .simulator
+      case .ultralight: return .ultralight
       default: throw Error.unsupportedCategory(type.category)
     }
   }
@@ -233,6 +316,10 @@ public class Converter {
           ]
         )
         return .weightShiftControlLand
+      case .ultralight:
+        // EASA ultralight has no FAA class concept; return nil so the FAA
+        // Category/Class column emits blank.
+        return nil
       default: throw Error.unsupportedCategory(type.category)
     }
   }

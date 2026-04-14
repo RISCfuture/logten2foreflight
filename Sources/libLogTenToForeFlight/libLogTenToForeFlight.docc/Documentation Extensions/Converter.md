@@ -12,7 +12,7 @@ The `Converter` class transforms LogTen Pro logbook data into ForeFlight-compati
 
 ### Creating a Converter
 
-- ``init(logbook:)``
+- ``init(logbook:defaultRegulations:)``
 
 ### Performing Conversion
 

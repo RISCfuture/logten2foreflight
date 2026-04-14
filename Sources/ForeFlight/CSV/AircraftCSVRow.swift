@@ -10,11 +10,18 @@ package struct AircraftCSVRow {
   package var model: String
   package var gearType: Aircraft.GearType?
   package var engineType: Aircraft.EngineType?
-  package var categoryClass: String  // Combined Category/Class field
-  package var complex: CSVBool
-  package var highPerformance: CSVBool
+  package var categoryClass: String  // Combined FAA Category/Class field
+  package var complex: CSVBool?
+  package var highPerformance: CSVBool?
   package var pressurized: CSVBool
   package var taa: CSVBool
+
+  // EASA aircraft columns.
+  package var equipTypeEASA: String
+  package var categoryClassEASA: String
+  package var complexAircraftEASA: CSVBool?
+  package var multiPilotEASA: CSVBool
+  package var sphpEASA: CSVBool?
 
   package var csvRow: [String] {
     [
@@ -27,10 +34,15 @@ package struct AircraftCSVRow {
       gearType?.csvString ?? "",
       engineType?.csvString ?? "",
       categoryClass,
-      complex.csvString,
-      highPerformance.csvString,
+      complex?.csvString ?? "",
+      highPerformance?.csvString ?? "",
       pressurized.csvString,
-      taa.csvString
+      taa.csvString,
+      equipTypeEASA,
+      categoryClassEASA,
+      complexAircraftEASA?.csvString ?? "",
+      multiPilotEASA.csvString,
+      sphpEASA?.csvString ?? ""
     ]
   }
 
@@ -43,12 +55,23 @@ package struct AircraftCSVRow {
     self.model = aircraft.model
     self.gearType = aircraft.gearType
     self.engineType = aircraft.engineType
-    // Map to ForeFlight's Category/Class format
+    // Map to ForeFlight's FAA Category/Class format.
     self.categoryClass = Self.mapCategoryClass(category: aircraft.category, class: aircraft.class)
-    self.complex = CSVBool(aircraft.complex)
-    self.highPerformance = CSVBool(aircraft.highPerformance)
+    self.complex = aircraft.complex.map { CSVBool($0) }
+    self.highPerformance = aircraft.highPerformance.map { CSVBool($0) }
     self.pressurized = CSVBool(aircraft.pressurized)
     self.taa = CSVBool(aircraft.technicallyAdvanced)
+
+    // EASA columns.
+    self.equipTypeEASA = aircraft.equipTypeEASAOverride ?? aircraft.simulatorType.easaEquipType
+    self.categoryClassEASA = Self.mapEASACategoryClass(
+      category: aircraft.category,
+      class: aircraft.class,
+      engineType: aircraft.engineType
+    )
+    self.complexAircraftEASA = aircraft.complexEASA.map { CSVBool($0) }
+    self.multiPilotEASA = CSVBool(aircraft.multiPilot)
+    self.sphpEASA = aircraft.sphpEASA.map { CSVBool($0) }
   }
 
   private static func mapCategoryClass(category: Aircraft.Category, class: Aircraft.Class?)
@@ -97,7 +120,57 @@ package struct AircraftCSVRow {
           default: return ""
         }
       case .simulator:
-        // Simulators don't use category/class in ForeFlight
+        return ""
+      case .ultralight:
+        return ""  // Not an FAA category
+    }
+  }
+
+  private static func mapEASACategoryClass(
+    category: Aircraft.Category,
+    class: Aircraft.Class?,
+    engineType: Aircraft.EngineType?
+  ) -> String {
+    switch category {
+      case .ultralight:
+        return "ultralight"
+      case .airplane:
+        guard let classValue = `class` else { return "" }
+        let turbine = engineType?.isTurbine ?? false
+        switch classValue {
+          case .singleEngineLand:
+            return turbine ? "single_engine_turbine_land" : "single_engine_piston_land"
+          case .multiEngineLand:
+            return turbine ? "multi_engine_turbine_land" : "multi_engine_piston_land"
+          case .singleEngineSea:
+            return turbine ? "single_engine_turbine_sea" : "single_engine_piston_sea"
+          case .multiEngineSea:
+            return "multi_engine_piston_sea"  // EASA has no multi_engine_turbine_sea
+          default: return ""
+        }
+      case .rotorcraft:
+        guard let classValue = `class` else { return "" }
+        switch classValue {
+          case .helicopter: return "helicopter"
+          case .gyroplane: return "gyroplane"
+          default: return ""
+        }
+      case .glider:
+        // EASA: powered glider (TMG) vs sailplane (unpowered).
+        if let engineType, engineType != .nonpowered {
+          return "touring_motor_glider"
+        }
+        return "sailplane"
+      case .lighterThanAir:
+        guard let classValue = `class` else { return "" }
+        switch classValue {
+          case .airship: return "airship"
+          case .freeBalloon: return "balloon"
+          default: return ""
+        }
+      case .poweredLift:
+        return "powered_lift"
+      default:
         return ""
     }
   }
