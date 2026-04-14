@@ -164,6 +164,11 @@ package struct Flight: Record {
   /// Whether this flight was a checkride (from custom LogTen field).
   package let checkride: Bool
 
+  /// Whether this flight was EASA refresher training (from custom LogTen
+  /// field titled "Refresher Training"). Always `false` if the field isn't
+  /// configured in LogTen.
+  package let refresherTraining: Bool
+
   /// Flight remarks and notes.
   package let remarks: String?
 
@@ -261,11 +266,13 @@ package struct Flight: Record {
     proficiencyProperty: KeyPath<CNFlight, String?>,
     checkrideProperty: KeyPath<CNFlight, String?>,
     safetyPilotProperty: KeyPath<CNFlightCrew, CNPerson?>,
-    examinerProperty: KeyPath<CNFlightCrew, CNPerson?>
+    examinerProperty: KeyPath<CNFlightCrew, CNPerson?>,
+    toweredProperty: KeyPath<CNPlace, String?>?,
+    refresherTrainingProperty: KeyPath<CNFlight, String?>?
   ) {
     self.aircraft = aircraft
     approaches = (flight.flight_flightApproaches?.approaches ?? [])
-      .map { .init(approach: $0) }
+      .map { .init(approach: $0, toweredProperty: toweredProperty) }
     PIC = .init(person: flight.flight_flightCrew?.flightCrew_PIC)
     SIC = .init(person: flight.flight_flightCrew?.flightCrew_SIC)
     instructor = .init(person: flight.flight_flightCrew?.flightCrew_instructor)
@@ -291,8 +298,8 @@ package struct Flight: Record {
     tachStart = flight.flight_tachStart?.doubleValue
     tachEnd = flight.flight_tachStop?.doubleValue
 
-    from = .init(place: flight.flight_fromPlace)
-    to = .init(place: flight.flight_toPlace)
+    from = .init(place: flight.flight_fromPlace, toweredProperty: toweredProperty)
+    to = .init(place: flight.flight_toPlace, toweredProperty: toweredProperty)
     route = flight.flight_route
     distance = flight.flight_distance?.doubleValue
 
@@ -325,6 +332,8 @@ package struct Flight: Record {
     IPC = flight.flight_instrumentProficiencyCheck?.boolValue ?? false
     proficiencyCheck = flight[keyPath: proficiencyProperty]?.isPresent ?? false
     checkride = flight[keyPath: checkrideProperty]?.isPresent ?? false
+    refresherTraining =
+      refresherTrainingProperty.flatMap { flight[keyPath: $0] }?.isPresent ?? false
 
     remarks = flight.flight_remarks
   }

@@ -84,6 +84,9 @@ take you 95% of the way there. In particular:
 - ForeFlight supports land and sea variants for Powered Parachute and
   Weight-Shift-Control aircraft, whereas LogTen Pro does not. These aircraft are
   assumed to be land variants.
+- Category, class, and engine type are matched by the display title you
+  see in LogTen (not by slot index), so renaming the defaults or adding
+  new ones is safe.
 
 ### Crew and passengers
 

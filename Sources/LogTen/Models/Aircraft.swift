@@ -20,10 +20,13 @@ package struct Aircraft: IdentifiableRecord {
   /// The year the aircraft was manufactured.
   package let year: UInt?
 
-  /// Whether the aircraft meets the definition of a complex aircraft.
+  /// Whether the aircraft meets the definition of a complex aircraft under
+  /// the user's primary regulatory regime (interpreted per
+  /// `--default-regulations`).
   package let complex: Bool
 
-  /// Whether the aircraft meets the definition of a high-performance aircraft.
+  /// Whether the aircraft meets the definition of a high-performance aircraft
+  /// under the user's primary regulatory regime.
   package let highPerformance: Bool
 
   /// Whether the aircraft is pressurized.
@@ -56,6 +59,18 @@ package struct Aircraft: IdentifiableRecord {
   /// Whether the aircraft has a diesel engine (from custom LogTen field).
   package let diesel: Bool
 
+  /// Optional user override for FAA complex (from custom LogTen field).
+  package let faaComplexOverride: Bool?
+
+  /// Optional user override for EASA complex (from custom LogTen field).
+  package let easaComplexOverride: Bool?
+
+  /// Optional user override for FAA high-performance (from custom LogTen field).
+  package let faaHighPerformanceOverride: Bool?
+
+  /// Optional user override for EASA SPHP (from custom LogTen field).
+  package let easaSPHPOverride: Bool?
+
   // MARK: Initializers
 
   init(
@@ -63,13 +78,27 @@ package struct Aircraft: IdentifiableRecord {
     typeCodeProperty: KeyPath<CNAircraftType, String?>,
     simTypeProperty: KeyPath<CNAircraftType, String?>,
     simCategoryProperty: KeyPath<CNAircraftType, String?>,
-    dieselProperty: KeyPath<CNAircraft, Bool>
+    dieselProperty: KeyPath<CNAircraft, Bool>,
+    faaComplexProperty: KeyPath<CNAircraft, Bool>?,
+    easaComplexProperty: KeyPath<CNAircraft, Bool>?,
+    faaHighPerformanceProperty: KeyPath<CNAircraft, Bool>?,
+    easaSPHPProperty: KeyPath<CNAircraft, Bool>?,
+    categoryTitles: [String: String],
+    classTitles: [String: String],
+    engineTypeTitles: [String: String],
+    faaEquipTypeProperty: KeyPath<CNAircraftType, String?>?,
+    easaEquipTypeProperty: KeyPath<CNAircraftType, String?>?
   ) {
     type = .init(
       aircraftType: aircraft.aircraft_aircraftType,
       typeCodeProperty: typeCodeProperty,
       simTypeProperty: simTypeProperty,
-      simCategoryProperty: simCategoryProperty
+      simCategoryProperty: simCategoryProperty,
+      categoryTitles: categoryTitles,
+      classTitles: classTitles,
+      engineTypeTitles: engineTypeTitles,
+      faaEquipTypeProperty: faaEquipTypeProperty,
+      easaEquipTypeProperty: easaEquipTypeProperty
     )
     tailNumber = aircraft.aircraft_aircraftID
     year = {
@@ -90,5 +119,9 @@ package struct Aircraft: IdentifiableRecord {
     tailwheel = aircraft.aircraft_tailwheel
     radial = aircraft.aircraft_radialEngine
     diesel = aircraft[keyPath: dieselProperty]
+    faaComplexOverride = faaComplexProperty.map { aircraft[keyPath: $0] }
+    easaComplexOverride = easaComplexProperty.map { aircraft[keyPath: $0] }
+    faaHighPerformanceOverride = faaHighPerformanceProperty.map { aircraft[keyPath: $0] }
+    easaSPHPOverride = easaSPHPProperty.map { aircraft[keyPath: $0] }
   }
 }

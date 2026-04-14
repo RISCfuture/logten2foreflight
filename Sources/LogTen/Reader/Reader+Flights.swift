@@ -4,9 +4,12 @@ import Foundation
 private let nightFullStopField = "Night Full Stops"
 private let proficiencyField = "FAR 61.58"
 private let checkrideField = "Checkride"
+private let refresherTrainingField = "Refresher Training"
 
 private let safetyPilotField = "Safety Pilot"
 private let examinerField = "Examiner"
+
+private let toweredField = "Towered"
 
 extension Reader {
   func fetchFlights(aircraft: [Aircraft]) throws -> [Flight] {
@@ -16,8 +19,10 @@ extension Reader {
     let nightFullStopProperty = try flightCustomLanding(for: nightFullStopField)
     let proficiencyProperty = try flightCustomNote(for: proficiencyField)
     let checkrideProperty = try flightCustomNote(for: checkrideField)
+    let refresherTrainingProperty = try? flightCustomNote(for: refresherTrainingField)
     let safetyPilotProperty = try flightCrewCustomPerson(for: safetyPilotField)
     let examinerProperty = try flightCrewCustomPerson(for: examinerField)
+    let toweredProperty = try? placeCustomAttribute(for: toweredField)
 
     return flights.compactMap { flight in
       guard
@@ -34,7 +39,9 @@ extension Reader {
         proficiencyProperty: proficiencyProperty,
         checkrideProperty: checkrideProperty,
         safetyPilotProperty: safetyPilotProperty,
-        examinerProperty: examinerProperty
+        examinerProperty: examinerProperty,
+        toweredProperty: toweredProperty,
+        refresherTrainingProperty: refresherTrainingProperty
       )
     }
   }
@@ -108,6 +115,30 @@ extension Reader {
       case "flight_selectedCrewCustom8": return \.flightCrew_custom8
       case "flight_selectedCrewCustom9": return \.flightCrew_custom9
       case "flight_selectedCrewCustom10": return \.flightCrew_custom10
+      default: preconditionFailure("Unknown custom attribute \(property.logTenProperty_key)")
+    }
+  }
+
+  private func placeCustomAttribute(for title: String) throws -> KeyPath<CNPlace, String?> {
+    let request = CNLogTenCustomizationProperty.fetchRequest(
+      title: title,
+      keyPrefix: "place_customAttribute"
+    )
+    let result = try container.viewContext.fetch(request)
+    guard result.count == 1, let property = result.first else {
+      throw Error.missingProperty(title, model: "Place")
+    }
+    switch property.logTenProperty_key {
+      case "place_customAttribute1": return \.place_customAttribute1
+      case "place_customAttribute2": return \.place_customAttribute2
+      case "place_customAttribute3": return \.place_customAttribute3
+      case "place_customAttribute4": return \.place_customAttribute4
+      case "place_customAttribute5": return \.place_customAttribute5
+      case "place_customAttribute6": return \.place_customAttribute6
+      case "place_customAttribute7": return \.place_customAttribute7
+      case "place_customAttribute8": return \.place_customAttribute8
+      case "place_customAttribute9": return \.place_customAttribute9
+      case "place_customAttribute10": return \.place_customAttribute10
       default: preconditionFailure("Unknown custom attribute \(property.logTenProperty_key)")
     }
   }

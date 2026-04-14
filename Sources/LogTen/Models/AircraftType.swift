@@ -19,10 +19,11 @@ package struct AircraftType: IdentifiableRecord {
   /// The aircraft model name.
   package let model: String
 
-  /// The FAA aircraft category.
+  /// The aircraft category, resolved by matching the LogTen category slot's
+  /// title (not its slot index).
   package let category: Category
 
-  /// The FAA aircraft class, if applicable for this category.
+  /// The aircraft class, if applicable, resolved by title.
   package let `class`: Class?
 
   /// The simulator type, if this is a training device.
@@ -31,11 +32,17 @@ package struct AircraftType: IdentifiableRecord {
   /// The category and class of aircraft being simulated.
   package let simulatorCategoryClass: SimulatorCategoryClass?
 
-  /// The engine type.
+  /// The engine type, resolved by title.
   package let engineType: EngineType?
 
   /// Whether this aircraft type requires a multi-pilot crew.
   package let multiPilot: Bool
+
+  /// Optional user override for FAA equipType (aircraft type custom attribute).
+  package let faaEquipTypeOverride: String?
+
+  /// Optional user override for EASA equipType (aircraft type custom attribute).
+  package let easaEquipTypeOverride: String?
 
   // MARK: Computed Properties
 
@@ -60,19 +67,26 @@ package struct AircraftType: IdentifiableRecord {
     aircraftType: CNAircraftType,
     typeCodeProperty: KeyPath<CNAircraftType, String?>,
     simTypeProperty: KeyPath<CNAircraftType, String?>,
-    simCategoryProperty: KeyPath<CNAircraftType, String?>
+    simCategoryProperty: KeyPath<CNAircraftType, String?>,
+    categoryTitles: [String: String],
+    classTitles: [String: String],
+    engineTypeTitles: [String: String],
+    faaEquipTypeProperty: KeyPath<CNAircraftType, String?>?,
+    easaEquipTypeProperty: KeyPath<CNAircraftType, String?>?
   ) {
-
     id = aircraftType.aircraftType_type
     typeCode = aircraftType[keyPath: typeCodeProperty] ?? aircraftType.aircraftType_type
     make = aircraftType.aircraftType_make
     model = aircraftType.aircraftType_model
-    category = .init(rawValue: aircraftType.aircraftType_category.logTenProperty_key)!
+
+    let categoryKey = aircraftType.aircraftType_category.logTenProperty_key
+    category = Category.from(title: categoryTitles[categoryKey])
+
     `class` = {
-      guard let title = aircraftType.aircraftType_aircraftClass?.logTenProperty_key else {
+      guard let key = aircraftType.aircraftType_aircraftClass?.logTenProperty_key else {
         return nil
       }
-      return .init(rawValue: title)
+      return Class.from(title: classTitles[key])
     }()
 
     simulatorType = {
@@ -85,89 +99,117 @@ package struct AircraftType: IdentifiableRecord {
     }()
     engineType = {
       guard let key = aircraftType.aircraftType_engineType?.logTenProperty_key else { return nil }
-      return .init(rawValue: key)
+      return EngineType.from(title: engineTypeTitles[key])
     }()
     multiPilot = aircraftType.aircraftType_multiPilot
+    faaEquipTypeOverride = faaEquipTypeProperty.flatMap { aircraftType[keyPath: $0] }
+    easaEquipTypeOverride = easaEquipTypeProperty.flatMap { aircraftType[keyPath: $0] }
   }
 
   // MARK: Enums
 
-  /// FAA aircraft categories as defined in LogTen Pro.
+  /// Aircraft categories recognized by the converter.
+  ///
+  /// Resolved by matching the LogTen category slot's display title against a
+  /// case-insensitive, hyphen-tolerant list of known names. Unknown titles
+  /// fall back to `.other`.
   package enum Category: String, RecordEnum {
-    /// Airplane (fixed-wing, powered).
-    case airplane = "flight_category1"
-    /// Rotorcraft (helicopter or gyroplane).
-    case rotorcraft = "flight_category2"
-    /// Powered lift (tiltrotor, etc.).
-    case poweredLift = "flight_category3"
-    /// Glider (unpowered fixed-wing).
-    case glider = "flight_category4"
-    /// Lighter than air (balloon or airship).
-    case lighterThanAir = "flight_category5"
-    /// Simulator or training device.
-    case simulator = "flight_category6"
-    /// Training device.
-    case trainingDevice = "flight_category7"
-    /// Personal computer aviation training device.
-    case PC_ATD = "flight_category8"
-    /// Powered parachute.
-    case poweredParachute = "flight_category9"
-    /// Weight-shift control aircraft.
-    case weightShiftControl = "flight_category10"
-    /// Unmanned aerial vehicle.
-    case UAV = "flight_category11"
-    /// Other category.
-    case other = "flight_category12"
+    case airplane
+    case rotorcraft
+    case poweredLift
+    case glider
+    case lighterThanAir
+    case simulator
+    case trainingDevice
+    case PC_ATD
+    case poweredParachute
+    case weightShiftControl
+    case UAV
+    case ultralight
+    case other
+
+    static func from(title: String?) -> Self {
+      let normalized = (title ?? "").normalizedForMatching
+      switch normalized {
+        case "airplane": return .airplane
+        case "rotorcraft": return .rotorcraft
+        case "poweredlift": return .poweredLift
+        case "glider": return .glider
+        case "lighterthanair": return .lighterThanAir
+        case "simulator": return .simulator
+        case "trainingdevice": return .trainingDevice
+        case "pcatd", "pc-atd", "pc_atd": return .PC_ATD
+        case "poweredparachute", "power-parachute", "powerparachute": return .poweredParachute
+        case "weightshiftcontrol": return .weightShiftControl
+        case "uav": return .UAV
+        case "ultralight": return .ultralight
+        default: return .other
+      }
+    }
   }
 
-  /// FAA aircraft classes as defined in LogTen Pro.
+  /// Aircraft classes recognized by the converter, resolved by title.
   package enum Class: String, RecordEnum {
-    /// Airplane multi-engine land.
-    case multiEngineLand = "flight_aircraftClass1"
-    /// Airplane single-engine land.
-    case singleEngineLand = "flight_aircraftClass2"
-    /// Airplane multi-engine sea.
-    case multiEngineSea = "flight_aircraftClass3"
-    /// Airplane single-engine sea.
-    case singleEngineSea = "flight_aircraftClass4"
-    /// Other class.
-    case other = "flight_aircraftClass5"
-    /// Rotorcraft gyroplane.
-    case gyroplane = "flight_aircraftClass6"
-    /// Lighter than air airship.
-    case airship = "flight_aircraftClass7"
-    /// Lighter than air free balloon.
-    case freeBalloon = "flight_aircraftClass8"
-    /// Rotorcraft helicopter.
-    case helicopter = "flight_aircraftClass9"
+    case multiEngineLand
+    case singleEngineLand
+    case multiEngineSea
+    case singleEngineSea
+    case other
+    case gyroplane
+    case airship
+    case freeBalloon
+    case helicopter
+
+    static func from(title: String?) -> Self? {
+      let normalized = (title ?? "").normalizedForMatching
+      switch normalized {
+        case "multiengineland": return .multiEngineLand
+        case "singleengineland": return .singleEngineLand
+        case "multienginesea": return .multiEngineSea
+        case "singleenginesea": return .singleEngineSea
+        case "other": return .other
+        case "gyroplane": return .gyroplane
+        case "airship": return .airship
+        case "freeballoon", "balloon": return .freeBalloon
+        case "helicopter": return .helicopter
+        default: return nil
+      }
+    }
   }
 
-  /// Engine types as defined in LogTen Pro.
+  /// Engine types recognized by the converter, resolved by title.
   package enum EngineType: String, RecordEnum {
-    /// Jet (turbojet) engine.
-    case jet = "flight_engineType1"
-    /// Generic turbine engine.
-    case turbine = "flight_engineType2"
-    /// Turboprop engine.
-    case turboprop = "flight_engineType3"
-    /// Reciprocating (piston) engine.
-    case reciprocating = "flight_engineType4"
-    /// Non-powered (glider).
-    case nonpowered = "flight_engineType5"
-    /// Turboshaft engine.
-    case turboshaft = "flight_engineType6"
-    /// Turbofan engine.
-    case turbofan = "flight_engineType7"
-    /// Ramjet engine.
-    case ramjet = "flight_engineType8"
-    /// Two-cycle piston engine.
-    case twoCycle = "flight_engineType9"
-    /// Four-cycle piston engine.
-    case fourCycle = "flight_engineType10"
-    /// Other engine type.
-    case other = "flight_engineType11"
-    /// Electric motor.
-    case electric = "flight_engineType12"
+    case jet
+    case turbine
+    case turboprop
+    case reciprocating
+    case nonpowered
+    case turboshaft
+    case turbofan
+    case ramjet
+    case twoCycle
+    case fourCycle
+    case other
+    case electric
+
+    static func from(title: String?) -> Self? {
+      let normalized = (title ?? "").normalizedForMatching
+      switch normalized {
+        case "jet": return .jet
+        case "turbine": return .turbine
+        case "turboprop": return .turboprop
+        case "reciprocating", "piston": return .reciprocating
+        case "nonpowered": return .nonpowered
+        case "turboshaft": return .turboshaft
+        case "turbofan": return .turbofan
+        case "ramjet": return .ramjet
+        case "2cycle", "twocycle": return .twoCycle
+        case "4cycle", "fourcycle": return .fourCycle
+        case "other": return .other
+        case "electric": return .electric
+        default: return nil
+      }
+    }
   }
 
   /// Simulator and training device types.
@@ -194,5 +236,16 @@ package struct AircraftType: IdentifiableRecord {
     case airplaneMultiEngineSea = "AMES"
     /// Glider.
     case glider = "GL"
+  }
+}
+
+extension String {
+  /// Lowercased, with spaces, hyphens, and underscores removed. Used for loose
+  /// matching of user-editable titles (e.g., "Multi-Engine Land" → "multiengineland").
+  fileprivate var normalizedForMatching: String {
+    lowercased()
+      .replacingOccurrences(of: " ", with: "")
+      .replacingOccurrences(of: "-", with: "")
+      .replacingOccurrences(of: "_", with: "")
   }
 }

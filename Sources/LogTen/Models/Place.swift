@@ -15,6 +15,17 @@ package struct Place: IdentifiableRecord {
   /// The ICAO airport identifier, if available.
   package let ICAO: String?
 
+  /// Whether this airport has an operating control tower. Meaningful only
+  /// when ``toweredKnown`` is `true`; when the user hasn't configured a
+  /// "Towered" custom attribute on places, this is always `false` and
+  /// callers should treat it as unknown.
+  package let towered: Bool
+
+  /// Whether ``towered`` reflects real data (custom attribute is configured)
+  /// vs. a default. When `false`, towered/non-towered attribution should be
+  /// skipped.
+  package let toweredKnown: Bool
+
   // MARK: Computed properties
 
   /// The ICAO identifier if available, otherwise the local identifier.
@@ -22,9 +33,26 @@ package struct Place: IdentifiableRecord {
 
   // MARK: Initializers
 
-  init?(place: CNPlace?) {
+  init?(place: CNPlace?, toweredProperty: KeyPath<CNPlace, String?>?) {
     guard let place else { return nil }
     identifier = place.place_identifier
     ICAO = place.place_icaoid
+    if let toweredProperty {
+      toweredKnown = true
+      towered = Self.isTruthy(place[keyPath: toweredProperty])
+    } else {
+      toweredKnown = false
+      towered = false
+    }
+  }
+
+  private static func isTruthy(_ value: String?) -> Bool {
+    guard let value else { return false }
+    let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    guard !trimmed.isEmpty else { return false }
+    switch trimmed {
+      case "0", "false", "no", "n": return false
+      default: return true
+    }
   }
 }

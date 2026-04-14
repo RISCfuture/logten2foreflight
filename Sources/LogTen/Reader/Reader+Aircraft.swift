@@ -1,7 +1,18 @@
+import CoreData
+import Foundation
+
 private let typeCodeField = "Type Code"
 private let simTypeField = "Sim Type"
 private let simCategoryField = "Sim A/C Cat"
 private let dieselField = "Diesel Engine"
+
+private let faaComplexField = "FAA Complex"
+private let easaComplexField = "EASA Complex"
+private let faaHighPerformanceField = "FAA High Performance"
+private let easaSPHPField = "EASA SPHP"
+
+private let faaEquipTypeField = "FAA Equip Type"
+private let easaEquipTypeField = "EASA Equip Type"
 
 extension Reader {
   func fetchAircraft() throws -> [Aircraft] {
@@ -13,15 +24,50 @@ extension Reader {
     let simCategoryProperty = try aircraftTypeCustomAttribute(for: simCategoryField)
     let dieselProperty = try aircraftCustomAttribute(for: dieselField)
 
+    let faaComplexProperty = try? aircraftCustomAttribute(for: faaComplexField)
+    let easaComplexProperty = try? aircraftCustomAttribute(for: easaComplexField)
+    let faaHighPerformanceProperty = try? aircraftCustomAttribute(for: faaHighPerformanceField)
+    let easaSPHPProperty = try? aircraftCustomAttribute(for: easaSPHPField)
+
+    let faaEquipTypeProperty = try? aircraftTypeCustomAttribute(for: faaEquipTypeField)
+    let easaEquipTypeProperty = try? aircraftTypeCustomAttribute(for: easaEquipTypeField)
+
+    let categoryTitles = try customizationTitles(keyPrefix: "flight_category")
+    let classTitles = try customizationTitles(keyPrefix: "flight_aircraftClass")
+    let engineTypeTitles = try customizationTitles(keyPrefix: "flight_engineType")
+
     return aircraft.map { aircraft in
       .init(
         aircraft: aircraft,
         typeCodeProperty: typeCodeProperty,
         simTypeProperty: simTypeProperty,
         simCategoryProperty: simCategoryProperty,
-        dieselProperty: dieselProperty
+        dieselProperty: dieselProperty,
+        faaComplexProperty: faaComplexProperty,
+        easaComplexProperty: easaComplexProperty,
+        faaHighPerformanceProperty: faaHighPerformanceProperty,
+        easaSPHPProperty: easaSPHPProperty,
+        categoryTitles: categoryTitles,
+        classTitles: classTitles,
+        engineTypeTitles: engineTypeTitles,
+        faaEquipTypeProperty: faaEquipTypeProperty,
+        easaEquipTypeProperty: easaEquipTypeProperty
       )
     }
+  }
+
+  /// Fetches all customization properties whose key begins with the given
+  /// prefix and returns a map from raw key to user-displayed title.
+  func customizationTitles(keyPrefix: String) throws -> [String: String] {
+    let request = NSFetchRequest<CNLogTenCustomizationProperty>(
+      entityName: "LogTenCustomizationProperty"
+    )
+    request.predicate = .init(format: "logTenProperty_key BEGINSWITH %@", keyPrefix)
+    let result = try container.viewContext.fetch(request)
+    return Dictionary(
+      result.map { ($0.logTenProperty_key, $0.logTenCustomizationProperty_title) },
+      uniquingKeysWith: { first, _ in first }
+    )
   }
 
   private func aircraftTypeCustomAttribute(for title: String) throws -> KeyPath<

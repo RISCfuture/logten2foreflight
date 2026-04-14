@@ -20,8 +20,8 @@ package struct Approach: Record {
 
   // MARK: Initializers
 
-  init(approach: CNApproach) {
-    place = .init(place: approach.approach_place)
+  init(approach: CNApproach, toweredProperty: KeyPath<CNPlace, String?>?) {
+    place = .init(place: approach.approach_place, toweredProperty: toweredProperty)
     type = {
       guard let type = approach.approach_type else { return nil }
       return .init(rawValue: type)
