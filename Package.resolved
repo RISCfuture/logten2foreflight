@@ -1,13 +1,13 @@
 {
-  "originHash" : "2e9e8d65d19d9da7ee9f99001162a11c161fb483a879d75e9e08094d4484909f",
+  "originHash" : "5281aeb3b7dd0f392cf434e2b42607a80a4165fcf815bb9da578bcd0dfd26b3a",
   "pins" : [
     {
       "identity" : "streamingcsv",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/RISCfuture/StreamingCSV.git",
       "state" : {
-        "revision" : "94ea844be1303b4235bdbadbca226a013221b8cd",
-        "version" : "1.1.2"
+        "revision" : "7f9340aa0eb840444c1fb19ad26d77492547df5e",
+        "version" : "2.0.0"
       }
     },
     {
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-docc-plugin",
       "state" : {
-        "revision" : "e977f65879f82b375a044c8837597f690c067da6",
-        "version" : "1.4.6"
+        "revision" : "647c708be89f834fa6a6d4945442793a77ddf5b6",
+        "version" : "1.5.0"
       }
     },
     {
@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-log.git",
       "state" : {
-        "revision" : "bbd81b6725ae874c69e9b8c8804d462356b55523",
-        "version" : "1.10.1"
+        "revision" : "5073617dac96330a486245e4c0179cb0a6fd2256",
+        "version" : "1.12.0"
       }
     },
     {
@@ -51,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/stackotter/swift-macro-toolkit",
       "state" : {
-        "revision" : "569627091e1fbb8745d691aeeb008e7247dedb7c",
-        "version" : "0.6.1"
+        "revision" : "d6ed555bb83c9f21a292e9769952e8f52610a6e2",
+        "version" : "0.9.0"
       }
     },
     {
