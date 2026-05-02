@@ -1,5 +1,9 @@
 # LogTen Pro to ForeFlight Logbook Converter
 
+[![CI](https://github.com/RISCfuture/logten2foreflight/actions/workflows/swift.yaml/badge.svg)](https://github.com/RISCfuture/logten2foreflight/actions/workflows/swift.yaml)
+[![Documentation](https://github.com/RISCfuture/logten2foreflight/actions/workflows/documentation.yaml/badge.svg)](https://riscfuture.github.io/logten2foreflight/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 This tool reads a LogTen Pro logbook, stored on your computer by the LogTen
 Pro application for macOS, and outputs a CSV file suitable for import into
 ForeFlight Logbook at https://plan.foreflight.com/logbook#/import
