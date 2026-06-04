@@ -29,17 +29,11 @@ package struct AircraftType: IdentifiableRecord {
   /// The simulator type, if this is a training device.
   package let simulatorType: SimulatorType?
 
-  /// The category and class of aircraft being simulated.
-  package let simulatorCategoryClass: SimulatorCategoryClass?
-
   /// The engine type, resolved by title.
   package let engineType: EngineType?
 
   /// Whether this aircraft type requires a multi-pilot crew.
   package let multiPilot: Bool
-
-  /// Optional user override for FAA equipType (aircraft type custom attribute).
-  package let faaEquipTypeOverride: String?
 
   /// Optional user override for EASA equipType (aircraft type custom attribute).
   package let easaEquipTypeOverride: String?
@@ -67,11 +61,9 @@ package struct AircraftType: IdentifiableRecord {
     aircraftType: CNAircraftType,
     typeCodeProperty: KeyPath<CNAircraftType, String?>,
     simTypeProperty: KeyPath<CNAircraftType, String?>,
-    simCategoryProperty: KeyPath<CNAircraftType, String?>,
     categoryTitles: [String: String],
     classTitles: [String: String],
     engineTypeTitles: [String: String],
-    faaEquipTypeProperty: KeyPath<CNAircraftType, String?>?,
     easaEquipTypeProperty: KeyPath<CNAircraftType, String?>?
   ) {
     id = aircraftType.aircraftType_type
@@ -93,16 +85,11 @@ package struct AircraftType: IdentifiableRecord {
       guard let typeString = aircraftType[keyPath: simTypeProperty] else { return nil }
       return .init(rawValue: typeString)
     }()
-    simulatorCategoryClass = {
-      guard let typeString = aircraftType[keyPath: simCategoryProperty] else { return nil }
-      return .init(rawValue: typeString)
-    }()
     engineType = {
       guard let key = aircraftType.aircraftType_engineType?.logTenProperty_key else { return nil }
       return EngineType.from(title: engineTypeTitles[key])
     }()
     multiPilot = aircraftType.aircraftType_multiPilot
-    faaEquipTypeOverride = faaEquipTypeProperty.flatMap { aircraftType[keyPath: $0] }
     easaEquipTypeOverride = easaEquipTypeProperty.flatMap { aircraftType[keyPath: $0] }
   }
 
@@ -222,20 +209,6 @@ package struct AircraftType: IdentifiableRecord {
     case FTD
     /// Full flight simulator.
     case FFS
-  }
-
-  /// Category and class combinations for simulators.
-  package enum SimulatorCategoryClass: String, RecordEnum {
-    /// Airplane single-engine land.
-    case airplaneSingleEngineLand = "ASEL"
-    /// Airplane single-engine sea.
-    case airplaneSingleEngineSea = "ASES"
-    /// Airplane multi-engine land.
-    case airplaneMultiEngineLand = "AMEL"
-    /// Airplane multi-engine sea.
-    case airplaneMultiEngineSea = "AMES"
-    /// Glider.
-    case glider = "GL"
   }
 }
 

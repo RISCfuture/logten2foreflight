@@ -161,9 +161,6 @@ package struct Flight: Record {
   /// Whether this flight was a proficiency check (from custom LogTen field).
   package let proficiencyCheck: Bool
 
-  /// Whether this flight was a checkride (from custom LogTen field).
-  package let checkride: Bool
-
   /// Whether this flight was EASA refresher training (from custom LogTen
   /// field titled "Refresher Training"). Always `false` if the field isn't
   /// configured in LogTen.
@@ -174,48 +171,9 @@ package struct Flight: Record {
 
   // MARK: Computed Properties
 
-  /// Total landings (day + night).
-  package var landingsAll: UInt { landingsDay + landingsNight }
-
   /// Day full-stop landings (derived from total full-stop minus night full-stop).
   package var landingsDayFullStop: UInt {
     UInt(max(Int(landingsFullStop) - Int(landingsNightFullStop), 0))
-  }
-
-  /// Total duty time as a time interval.
-  package var dutyTime: TimeInterval? {
-    guard let onDuty, let offDuty else { return nil }
-    return offDuty.timeIntervalSince(onDuty)
-  }
-
-  /// Total duty time in hours.
-  package var dutyHours: Double? {
-    guard let dutyTime else { return nil }
-    return dutyTime / 3600
-  }
-
-  /// Block time (out to in) as a time interval.
-  package var blockTime: TimeInterval? {
-    guard let out, let `in` else { return nil }
-    return `in`.timeIntervalSince(out)
-  }
-
-  /// Block time in hours.
-  package var blockHours: Double? {
-    guard let blockTime else { return nil }
-    return blockTime / 3600
-  }
-
-  /// Flight time (off to on) as a time interval.
-  package var flightTime: TimeInterval? {
-    guard let off, let on else { return nil }
-    return on.timeIntervalSince(off)
-  }
-
-  /// Flight time in hours.
-  package var flightHours: Double? {
-    guard let flightTime else { return nil }
-    return flightTime / 3600
   }
 
   /// Total time converted to hours.
@@ -264,7 +222,6 @@ package struct Flight: Record {
     aircraft: Aircraft,
     nightFullStopProperty: KeyPath<CNFlight, NSNumber?>,
     proficiencyProperty: KeyPath<CNFlight, String?>,
-    checkrideProperty: KeyPath<CNFlight, String?>,
     safetyPilotProperty: KeyPath<CNFlightCrew, CNPerson?>,
     examinerProperty: KeyPath<CNFlightCrew, CNPerson?>,
     toweredProperty: KeyPath<CNPlace, String?>?,
@@ -331,7 +288,6 @@ package struct Flight: Record {
     flightReview = flight.flight_review?.boolValue ?? false
     IPC = flight.flight_instrumentProficiencyCheck?.boolValue ?? false
     proficiencyCheck = flight[keyPath: proficiencyProperty]?.isPresent ?? false
-    checkride = flight[keyPath: checkrideProperty]?.isPresent ?? false
     refresherTraining =
       refresherTrainingProperty.flatMap { flight[keyPath: $0] }?.isPresent ?? false
 

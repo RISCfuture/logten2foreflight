@@ -3,7 +3,6 @@ import Foundation
 
 private let typeCodeField = "Type Code"
 private let simTypeField = "Sim Type"
-private let simCategoryField = "Sim A/C Cat"
 private let dieselField = "Diesel Engine"
 
 private let faaComplexField = "FAA Complex"
@@ -11,7 +10,6 @@ private let easaComplexField = "EASA Complex"
 private let faaHighPerformanceField = "FAA High Performance"
 private let easaSPHPField = "EASA SPHP"
 
-private let faaEquipTypeField = "FAA Equip Type"
 private let easaEquipTypeField = "EASA Equip Type"
 
 extension Reader {
@@ -21,7 +19,6 @@ extension Reader {
 
     let typeCodeProperty = try aircraftTypeCustomAttribute(for: typeCodeField)
     let simTypeProperty = try aircraftTypeCustomAttribute(for: simTypeField)
-    let simCategoryProperty = try aircraftTypeCustomAttribute(for: simCategoryField)
     let dieselProperty = try aircraftCustomAttribute(for: dieselField)
 
     let faaComplexProperty = try? aircraftCustomAttribute(for: faaComplexField)
@@ -29,7 +26,6 @@ extension Reader {
     let faaHighPerformanceProperty = try? aircraftCustomAttribute(for: faaHighPerformanceField)
     let easaSPHPProperty = try? aircraftCustomAttribute(for: easaSPHPField)
 
-    let faaEquipTypeProperty = try? aircraftTypeCustomAttribute(for: faaEquipTypeField)
     let easaEquipTypeProperty = try? aircraftTypeCustomAttribute(for: easaEquipTypeField)
 
     let categoryTitles = try customizationTitles(keyPrefix: "flight_category")
@@ -41,7 +37,6 @@ extension Reader {
         aircraft: aircraft,
         typeCodeProperty: typeCodeProperty,
         simTypeProperty: simTypeProperty,
-        simCategoryProperty: simCategoryProperty,
         dieselProperty: dieselProperty,
         faaComplexProperty: faaComplexProperty,
         easaComplexProperty: easaComplexProperty,
@@ -50,7 +45,6 @@ extension Reader {
         categoryTitles: categoryTitles,
         classTitles: classTitles,
         engineTypeTitles: engineTypeTitles,
-        faaEquipTypeProperty: faaEquipTypeProperty,
         easaEquipTypeProperty: easaEquipTypeProperty
       )
     }
