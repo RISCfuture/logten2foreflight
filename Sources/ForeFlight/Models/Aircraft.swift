@@ -5,28 +5,6 @@ import Foundation
 /// An `Aircraft` represents an aircraft or training device with all the
 /// properties expected by ForeFlight's CSV import format.
 package struct Aircraft {
-  static var fieldMapping: [String: PartialKeyPath<Self>] {
-    [
-      "AircraftID": \Self.tailNumber,
-      "EquipmentType": \Self.simulatorType,
-      "TypeCode": \Self.typeCode,
-      "Year": \Self.year,
-      "Make": \Self.make,
-      "Model": \Self.model,
-      "Category": \Self.category,
-      "Class": \Self.class,
-      "GearType": \Self.gearType,
-      "EngineType": \Self.engineType,
-      "Complex": \Self.complex,
-      "HighPerformance": \Self.highPerformance,
-      "Pressurized": \Self.pressurized,
-      "TAA": \Self.technicallyAdvanced,
-      "ComplexEASA": \Self.complexEASA,
-      "SphpEASA": \Self.sphpEASA,
-      "EquipTypeEASAOverride": \Self.equipTypeEASAOverride
-    ]
-  }
-
   package private(set) var tailNumber: String?
   package private(set) var simulatorType: SimulatorType
   package private(set) var typeCode: String?

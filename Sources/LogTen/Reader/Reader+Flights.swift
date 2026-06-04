@@ -3,7 +3,6 @@ import Foundation
 
 private let nightFullStopField = "Night Full Stops"
 private let proficiencyField = "FAR 61.58"
-private let checkrideField = "Checkride"
 private let refresherTrainingField = "Refresher Training"
 
 private let safetyPilotField = "Safety Pilot"
@@ -18,7 +17,6 @@ extension Reader {
 
     let nightFullStopProperty = try flightCustomLanding(for: nightFullStopField)
     let proficiencyProperty = try flightCustomNote(for: proficiencyField)
-    let checkrideProperty = try flightCustomNote(for: checkrideField)
     let refresherTrainingProperty = try? flightCustomNote(for: refresherTrainingField)
     let safetyPilotProperty = try flightCrewCustomPerson(for: safetyPilotField)
     let examinerProperty = try flightCrewCustomPerson(for: examinerField)
@@ -37,7 +35,6 @@ extension Reader {
         aircraft: aircraft,
         nightFullStopProperty: nightFullStopProperty,
         proficiencyProperty: proficiencyProperty,
-        checkrideProperty: checkrideProperty,
         safetyPilotProperty: safetyPilotProperty,
         examinerProperty: examinerProperty,
         toweredProperty: toweredProperty,

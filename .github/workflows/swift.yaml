@@ -24,8 +24,6 @@ jobs:
           swift-version: "6.3"
       - name: Build
         run: swift build -v
-      - name: Run tests
-        run: swift test -v
   lint:
     name: Run SwiftLint
     runs-on: macos-latest

@@ -77,7 +77,6 @@ package struct Aircraft: IdentifiableRecord {
     aircraft: CNAircraft,
     typeCodeProperty: KeyPath<CNAircraftType, String?>,
     simTypeProperty: KeyPath<CNAircraftType, String?>,
-    simCategoryProperty: KeyPath<CNAircraftType, String?>,
     dieselProperty: KeyPath<CNAircraft, Bool>,
     faaComplexProperty: KeyPath<CNAircraft, Bool>?,
     easaComplexProperty: KeyPath<CNAircraft, Bool>?,
@@ -86,18 +85,15 @@ package struct Aircraft: IdentifiableRecord {
     categoryTitles: [String: String],
     classTitles: [String: String],
     engineTypeTitles: [String: String],
-    faaEquipTypeProperty: KeyPath<CNAircraftType, String?>?,
     easaEquipTypeProperty: KeyPath<CNAircraftType, String?>?
   ) {
     type = .init(
       aircraftType: aircraft.aircraft_aircraftType,
       typeCodeProperty: typeCodeProperty,
       simTypeProperty: simTypeProperty,
-      simCategoryProperty: simCategoryProperty,
       categoryTitles: categoryTitles,
       classTitles: classTitles,
       engineTypeTitles: engineTypeTitles,
-      faaEquipTypeProperty: faaEquipTypeProperty,
       easaEquipTypeProperty: easaEquipTypeProperty
     )
     tailNumber = aircraft.aircraft_aircraftID
