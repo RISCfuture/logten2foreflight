@@ -6,7 +6,7 @@
 
 This tool reads a LogTen Pro logbook, stored on your computer by the LogTen
 Pro application for macOS, and outputs a CSV file suitable for import into
-ForeFlight Logbook at https://plan.foreflight.com/logbook#/import
+ForeFlight Logbook at <https://plan.foreflight.com/logbook#/import>
 
 To use this script, you must have LogTen Pro for macOS.
 
@@ -19,7 +19,7 @@ project, run `swift build` to install dependencies and create the executable.
 
 Run `logten-to-foreflight --help` for usage instructions:
 
-```
+```text
 USAGE: logten-to-foreflight [--logten-file <logten-file>] [--logten-managed-object-model <logten-managed-object-model>] [--default-regulations <default-regulations>] <foreflight-file> [--verbose]
 
 ARGUMENTS:
@@ -62,7 +62,7 @@ take you 95% of the way there. In particular:
   You will need a "Custom Notes" field named "FAR 61.58". Flights with any
   non-empty value in this field will be considered recurrent checkrides.
 - LogTen Pro does not have a "US PIC" field. This is kept equal to PIC.
-- Examiner time will be credited for flights where the Examiner field is set to 
+- Examiner time will be credited for flights where the Examiner field is set to
   your crew profile (see "Crew and passengers" below).
 - Each flight is classified into one regulatory regime. Flights whose
   departure airport ICAO starts with `K` are treated as FAA; flights

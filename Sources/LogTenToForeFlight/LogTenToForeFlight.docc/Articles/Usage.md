@@ -26,7 +26,7 @@ The executable will be located at `.build/release/logten-to-foreflight`.
 
 ### Basic Syntax
 
-```
+```text
 logten-to-foreflight [options] <foreflight-file>
 ```
 
