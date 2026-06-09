@@ -40,14 +40,14 @@ To use this library, you need:
 
 The LogTen Pro data is typically stored at:
 
-```
+```text
 ~/Library/Group Containers/group.com.coradine.LogTenPro/
     LogTenProData_*/LogTenCoreDataStore.sql
 ```
 
 The managed object model is located in the application bundle:
 
-```
+```text
 /Applications/LogTen.app/Contents/Resources/CNLogBookDocument.momd
 ```
 
