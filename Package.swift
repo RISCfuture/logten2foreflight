@@ -4,6 +4,11 @@
 import CompilerPluginSupport
 import PackageDescription
 
+let approachableConcurrency: [SwiftSetting] = [
+  .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+  .enableUpcomingFeature("InferIsolatedConformances")
+]
+
 let package = Package(
   name: "LogTenToForeFlight",
   defaultLocalization: "en",
@@ -26,7 +31,8 @@ let package = Package(
     // Targets can depend on other targets in this package, and on products in packages this package depends on.
     .target(
       name: "LogTen",
-      resources: [.process("Localizable.xcstrings")]
+      resources: [.process("Localizable.xcstrings")],
+      swiftSettings: approachableConcurrency
     ),
     .target(
       name: "ForeFlight",
@@ -35,7 +41,8 @@ let package = Package(
       ],
       resources: [
         .process("Resources")
-      ]
+      ],
+      swiftSettings: approachableConcurrency
     ),
     .target(
       name: "libLogTenToForeFlight",
@@ -43,7 +50,8 @@ let package = Package(
         "LogTen",
         "ForeFlight",
         .product(name: "Logging", package: "swift-log")
-      ]
+      ],
+      swiftSettings: approachableConcurrency
     ),
     .executableTarget(
       name: "LogTenToForeFlight",
@@ -51,7 +59,8 @@ let package = Package(
         .target(name: "libLogTenToForeFlight"),
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "Logging", package: "swift-log")
-      ]
+      ],
+      swiftSettings: approachableConcurrency
     )
   ],
 
