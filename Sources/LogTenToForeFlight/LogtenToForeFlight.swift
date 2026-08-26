@@ -36,32 +36,27 @@ extension ForeFlight.Regulations: ExpressibleByArgument {
 struct LogtenToForeFlight: AsyncParsableCommand {
   private static let logtenGroupContainerPath =
     "Library/Group Containers/group.com.coradine.LogTenPro"
-  private static let logtenDataStoreFilename = "LogTenCoreDataStore.sql"
+  private static let dataDirectoryPrefix = "LogTenProData_"
+  private static let dataStoreFilename = "LogTenCoreDataStore.sql"
   private static let managedObjectModelPath = "LogTen.app/Contents/Resources/CNLogBookDocument.momd"
 
-  private static var logtenDataStoreURL: URL {
-    let homeDir = FileManager.default.homeDirectoryForCurrentUser
-    let groupContainer = homeDir.appendingPathComponent(logtenGroupContainerPath)
-    let dataDirectory =
-      (try? FileManager.default.contentsOfDirectory(
-        at: groupContainer,
-        includingPropertiesForKeys: nil
-      ))?.first { $0.lastPathComponent.hasPrefix("LogTenProData_") }
-      ?? groupContainer.appendingPathComponent("LogTenProData")
-    return dataDirectory.appendingPathComponent(logtenDataStoreFilename)
+  private static var logtenGroupContainerURL: URL {
+    FileManager.default.homeDirectoryForCurrentUser.appending(path: logtenGroupContainerPath)
   }
 
   private static var managedObjectModelURL: URL {
     .applicationDirectory.appending(path: managedObjectModelPath)
   }
 
-  /// Path to the LogTen Pro Core Data store.
+  /// Path to the LogTen Pro Core Data store. When omitted, the most recently
+  /// modified logbook in the LogTen Pro group container is used.
   @Option(
-    help: "The LogTenCoreDataStore.sql file containing the logbook entries.",
+    help:
+      "The LogTenCoreDataStore.sql file containing the logbook entries. Defaults to the most recently modified LogTen Pro logbook.",
     completion: .file(extensions: ["sql"]),
     transform: { .init(filePath: $0, directoryHint: .notDirectory) }
   )
-  var logtenFile = Self.logtenDataStoreURL
+  var logtenFile: URL?
 
   /// Path to the LogTen Pro managed object model.
   @Option(
@@ -92,6 +87,36 @@ struct LogtenToForeFlight: AsyncParsableCommand {
   @Flag(help: "Include extra information in the output.")
   var verbose = false
 
+  /// LogTen Pro suffixes its data directory with an installation-specific
+  /// identifier, so the logbook is located by searching the group container
+  /// rather than by assuming a fixed path.
+  private static func locateDataStore() throws -> URL {
+    guard let dataStore = dataStoresByRecency().first else {
+      throw LogTen.Error.couldntFindDataStore(directory: logtenGroupContainerURL)
+    }
+    return dataStore
+  }
+
+  private static func dataStoresByRecency() -> [URL] {
+    let dataDirectories =
+      (try? FileManager.default.contentsOfDirectory(
+        at: logtenGroupContainerURL,
+        includingPropertiesForKeys: nil
+      )) ?? []
+
+    return
+      dataDirectories
+      .filter { $0.lastPathComponent.hasPrefix(dataDirectoryPrefix) }
+      .map { $0.appending(path: dataStoreFilename) }
+      .filter { FileManager.default.fileExists(atPath: $0.path(percentEncoded: false)) }
+      .sorted { modificationDate(of: $0) > modificationDate(of: $1) }
+  }
+
+  private static func modificationDate(of url: URL) -> Date {
+    (try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate)
+      ?? .distantPast
+  }
+
   /// Executes the conversion process.
   ///
   /// This method:
@@ -102,8 +127,9 @@ struct LogtenToForeFlight: AsyncParsableCommand {
     var logger = Logger(label: "codes.tim.LogTenToForeFlight")
     logger.logLevel = verbose ? .info : .warning
 
+    let storeURL = try logtenFile ?? Self.locateDataStore()
     let LTPLogbook = try await LogTen.Reader(
-      storeURL: logtenFile,
+      storeURL: storeURL,
       modelURL: logtenManagedObjectModel
     )
     .read()

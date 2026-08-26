@@ -24,6 +24,9 @@
     "Couldn’t create Core Data store for “%@”" : {
 
     },
+    "Couldn’t find a LogTen Pro logbook in “%@”" : {
+
+    },
     "LogTen Pro aircraft category “%@” is not supported by ForeFlight" : {
 
     },

@@ -40,7 +40,7 @@ logten-to-foreflight [options] <foreflight-file>
 
 | Option | Description |
 |--------|-------------|
-| `--logten-file <path>` | Path to the LogTenCoreDataStore.sql file. Defaults to the standard LogTen Pro location. |
+| `--logten-file <path>` | Path to the LogTenCoreDataStore.sql file. Defaults to the most recently modified logbook in the LogTen Pro group container. |
 | `--logten-managed-object-model <path>` | Path to the LogTen Pro managed object model (.momd). Defaults to the standard location in /Applications. |
 | `--verbose` | Enable verbose output for debugging. |
 | `-h, --help` | Show help information. |
@@ -51,6 +51,10 @@ When not specified, the tool uses these default locations:
 
 - **LogTen Data Store:** `~/Library/Group Containers/group.com.coradine.LogTenPro/LogTenProData_*/LogTenCoreDataStore.sql`
 - **Managed Object Model:** `/Applications/LogTen.app/Contents/Resources/CNLogBookDocument.momd`
+
+LogTen Pro suffixes its data directory with an installation-specific identifier,
+and can leave older directories behind across migrations. The tool searches the
+group container and uses the most recently modified logbook it finds there.
 
 ## Examples
 

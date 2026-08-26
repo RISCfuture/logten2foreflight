@@ -28,6 +28,7 @@ ARGUMENTS:
 OPTIONS:
   --logten-file <logten-file>
                           The LogTenCoreDataStore.sql file containing the logbook entries.
+                          Defaults to the most recently modified LogTen Pro logbook.
   --logten-managed-object-model <logten-managed-object-model>
                           The location of the LogTen Pro managed object model file.
   --default-regulations <default-regulations>

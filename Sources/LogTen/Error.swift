@@ -2,6 +2,12 @@ import Foundation
 
 /// Errors that can occur when reading or processing LogTen Pro data.
 package enum Error: Swift.Error {
+  /// No LogTen Pro logbook database could be found. LogTen Pro stores its
+  /// logbook in a directory whose name ends with an installation-specific
+  /// identifier, and no such directory containing a logbook database exists.
+  /// - Parameter directory: The LogTen Pro group container that was searched.
+  case couldntFindDataStore(directory: URL)
+
   /// The Core Data store could not be created from the managed object model.
   /// - Parameter path: The URL to the managed object model that failed to load.
   case couldntCreateStore(path: URL)
@@ -42,6 +48,9 @@ package enum Error: Swift.Error {
 extension Error: LocalizedError {
   package var errorDescription: String? {
     switch self {
+      case .couldntFindDataStore(let directory):
+        let path = directory.path(percentEncoded: false)
+        return String(localized: "Couldn’t find a LogTen Pro logbook in “\(path)”")
       case .couldntCreateStore(let path):
         return String(localized: "Couldn’t create Core Data store for “\(path.lastPathComponent)”")
       case let .missingProperty(property, model):
