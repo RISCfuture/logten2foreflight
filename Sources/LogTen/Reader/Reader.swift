@@ -1,5 +1,5 @@
 import CoreData
-import Foundation
+package import Foundation
 
 /// Reads a LogTen Pro logbook from its Core Data store.
 ///

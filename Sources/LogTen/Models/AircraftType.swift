@@ -1,3 +1,5 @@
+import Foundation
+
 /// The type definition for an aircraft in LogTen Pro.
 ///
 /// An `AircraftType` defines the make, model, category, class, and engine type

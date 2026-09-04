@@ -1,4 +1,4 @@
-import Foundation
+package import Foundation
 
 /// Errors that can occur when reading or processing LogTen Pro data.
 package enum Error: Swift.Error {

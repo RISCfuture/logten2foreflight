@@ -1,4 +1,4 @@
-import Foundation
+package import Foundation
 
 /// A single flight record from a LogTen Pro logbook.
 ///

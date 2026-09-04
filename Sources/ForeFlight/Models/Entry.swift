@@ -1,4 +1,4 @@
-import Foundation
+package import Foundation
 
 /// A wrapper for date-only values in CSV output.
 ///

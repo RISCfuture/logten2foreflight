@@ -4,9 +4,13 @@
 import CompilerPluginSupport
 import PackageDescription
 
-let approachableConcurrency: [SwiftSetting] = [
+let upcomingFeatures: [SwiftSetting] = [
   .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
-  .enableUpcomingFeature("InferIsolatedConformances")
+  .enableUpcomingFeature("InferIsolatedConformances"),
+  .enableUpcomingFeature("ImmutableWeakCaptures"),
+  .enableUpcomingFeature("MemberImportVisibility"),
+  .enableUpcomingFeature("ExistentialAny"),
+  .enableUpcomingFeature("InternalImportsByDefault")
 ]
 
 let package = Package(
@@ -32,7 +36,7 @@ let package = Package(
     .target(
       name: "LogTen",
       resources: [.process("Localizable.xcstrings")],
-      swiftSettings: approachableConcurrency
+      swiftSettings: upcomingFeatures
     ),
     .target(
       name: "ForeFlight",
@@ -42,7 +46,7 @@ let package = Package(
       resources: [
         .process("Resources")
       ],
-      swiftSettings: approachableConcurrency
+      swiftSettings: upcomingFeatures
     ),
     .target(
       name: "libLogTenToForeFlight",
@@ -51,7 +55,7 @@ let package = Package(
         "ForeFlight",
         .product(name: "Logging", package: "swift-log")
       ],
-      swiftSettings: approachableConcurrency
+      swiftSettings: upcomingFeatures
     ),
     .executableTarget(
       name: "LogTenToForeFlight",
@@ -60,7 +64,7 @@ let package = Package(
         .product(name: "ArgumentParser", package: "swift-argument-parser"),
         .product(name: "Logging", package: "swift-log")
       ],
-      swiftSettings: approachableConcurrency
+      swiftSettings: upcomingFeatures
     )
   ],
 
