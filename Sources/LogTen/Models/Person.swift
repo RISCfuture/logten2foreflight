@@ -1,4 +1,5 @@
-import Foundation
+import CoreData
+package import Foundation
 
 /// A person (crew member or passenger) in a LogTen Pro logbook.
 ///

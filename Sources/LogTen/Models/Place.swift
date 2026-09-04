@@ -1,3 +1,5 @@
+import Foundation
+
 /// An airport or location in a LogTen Pro logbook.
 ///
 /// A `Place` represents a departure or destination airport. It stores both the

@@ -1,6 +1,6 @@
-import ForeFlight
+public import ForeFlight
 import Foundation
-import LogTen
+public import LogTen
 import Logging
 
 /// Converts a LogTen Pro logbook to a ForeFlight logbook.

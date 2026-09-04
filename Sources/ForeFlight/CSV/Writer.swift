@@ -1,4 +1,4 @@
-import Foundation
+package import Foundation
 import StreamingCSV
 
 /// Writes a ForeFlight logbook to CSV format.

@@ -1,5 +1,5 @@
-import ArgumentParser
-import ForeFlight
+public import ArgumentParser
+public import ForeFlight
 import Foundation
 import LogTen
 import Logging
