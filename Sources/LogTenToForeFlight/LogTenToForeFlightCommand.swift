@@ -33,7 +33,7 @@ extension ForeFlight.Regulations: ExpressibleByArgument {
 /// logten-to-foreflight --verbose output.csv
 /// ```
 @main
-struct LogtenToForeFlight: AsyncParsableCommand {
+struct LogTenToForeFlightCommand: AsyncParsableCommand {
   private static let logtenGroupContainerPath =
     "Library/Group Containers/group.com.coradine.LogTenPro"
   private static let dataDirectoryPrefix = "LogTenProData_"

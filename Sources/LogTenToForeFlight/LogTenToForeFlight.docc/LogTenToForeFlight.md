@@ -38,4 +38,4 @@ After generating the CSV file, import it to ForeFlight Logbook at <https://plan.
 
 ### Entry Point
 
-- ``LogtenToForeFlight``
+- ``LogTenToForeFlightCommand``
