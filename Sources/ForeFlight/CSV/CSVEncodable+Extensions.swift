@@ -149,14 +149,14 @@ extension Double {
     }
     if self == floor(self) {
       // Whole number - no decimal point
-      return String(format: "%.0f", self)
+      return unsafe String(format: "%.0f", self)
     }
     // Round to 0.1 precision
     let rounded = (self * 10).rounded() / 10
     if rounded == floor(rounded) {
-      return String(format: "%.0f", rounded)
+      return unsafe String(format: "%.0f", rounded)
     }
-    return String(format: "%.1f", rounded)
+    return unsafe String(format: "%.1f", rounded)
   }
 
   public init?(csvString: String) {
