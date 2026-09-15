@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Require Swift 6.4 and macOS 27.
+- Adopt strict memory safety.
+- Build, test, and release on the Xcode 27 runner image.
+- Rename the command struct so it no longer collides with the module's documentation page.
+
 ## [1.0.0] - 2026-09-15
 
 ### Added
