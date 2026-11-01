@@ -27,8 +27,8 @@ let package = Package(
   dependencies: [
     // Dependencies declare other packages that this package depends on.
     .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.8.2"),
-    .package(url: "https://github.com/apple/swift-log.git", from: "1.15.0"),
-    .package(url: "https://github.com/RISCfuture/StreamingCSV.git", from: "2.1.0"),
+    .package(url: "https://github.com/apple/swift-log.git", from: "1.16.2"),
+    .package(url: "https://github.com/RISCfuture/StreamingCSV.git", from: "3.0.0"),
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.5.0")
   ],
   targets: [

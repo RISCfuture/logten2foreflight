@@ -1,13 +1,13 @@
 {
-  "originHash" : "b48f0cc4de24fec6adecc5c7d6877cee8c5d40140ecf97a27e64b88c84f7c7b1",
+  "originHash" : "968cfe9bc96c895fe02710cb6868ecb7b082c6ff33eca1f21ac400e7ede32b60",
   "pins" : [
     {
       "identity" : "streamingcsv",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/RISCfuture/StreamingCSV.git",
       "state" : {
-        "revision" : "c45b96da50605c3d83bed31fe7934fdf583467ab",
-        "version" : "2.1.0"
+        "revision" : "f240a8d5e3f5522dd78e1057f684bb176481f310",
+        "version" : "3.0.0"
       }
     },
     {
@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-log.git",
       "state" : {
-        "revision" : "3ffafb9722d5d918c614feb496c8789a3b59d222",
-        "version" : "1.15.0"
+        "revision" : "c9c6bb9d275ec0d95c3ad16391f3f045dc623104",
+        "version" : "1.16.2"
       }
     },
     {
